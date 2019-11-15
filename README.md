@@ -7,3 +7,99 @@ We don't care how you optimize the delivery of customers, it can be a simple if 
 The solutions will be judged on creativity, impact, feasibility, novelty and cost efficiency.
 
 The winning team will receive €2000.
+
+## Agent
+
+### Interface
+
+```go
+interface Agent {
+    init(string team_name) -> Agent
+    act(Observation ob) -> Action[]
+}
+```
+
+### Input
+
+**Observation**
+
+```json
+{
+    "map": Bool[][],
+    "teams": Team[],
+    "customers": Customer[],
+}
+```
+
+**Team**
+
+```json
+{
+    "name": String,
+    "cars": Car[],
+    "score": Int,
+}
+```
+
+**Car**
+
+```json
+{
+    "position": Int[2],
+    "capacity": Int,
+    "availableCapacity": Int,
+    "customers": String[],
+}
+```
+
+**Customer**
+
+```json
+{
+    "id": String,
+    "position": Int[2] | null,
+    "destination": Int[2],
+}
+```
+
+### Output
+
+**Action**
+
+```json
+{
+    "car": String,
+    "direction": 0 | 1 | 2 | 3 | null
+}
+```
+
+
+## API Library
+
+```go
+interface Agent {
+    getWorld() -> Observation
+    moveCar(string team_name, string car_id, int direction) -> void
+}
+```
+
+
+## Visualiser
+
+**Act**
+
+```json
+{
+    "team": String,
+    "actios": Action[],
+}
+```
+
+**Step**
+
+```json
+{
+    "state": Observation,
+    "acts": Act[],
+}
+```
