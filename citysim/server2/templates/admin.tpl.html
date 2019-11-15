@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Controls</title>
+  </head>
+  <body>
+    <h1>Team control</h1>
+    <div>
+      <form action="/admin/team" method="post">
+        Team Name: <input type="text" name="team_name">
+        <input type="submit" value="Add">
+      </form>
+    </div>
+    <div>
+      <table>
+        <tr>
+          <th>Team ID</th>
+          <th>Team Name</th>
+          <th>Token</th>
+        </tr>
+{{ range $id, $team := . }}
+        <tr>
+          <td>{{ $id }}</td>
+          <td>{{ $team.Name }}</td>
+          <td>{{ $team.Token }}</td>
+        </tr>
+{{ end }}
+      </table>
+    </div>
+    <h1>Game control</h1>
+    <div>
+      <form action="/admin/start" method="post">
+        <input type="submit" value="Start">
+      </form>
+      <form action="/admin/stop" method="post">
+        <input type="submit" value="Stop">
+      </form>
+    </div>
+  </body>
+</html>
