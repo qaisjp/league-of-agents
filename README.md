@@ -35,6 +35,7 @@ interface Agent {
 
 ```javascript
 {
+    "id": String,
     "name": String,
     "cars": Car[],
     "score": Int,
