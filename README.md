@@ -23,7 +23,7 @@ interface Agent {
 
 **Observation**
 
-```json
+```javascript
 {
     "map": Bool[][],
     "teams": Team[],
@@ -33,7 +33,7 @@ interface Agent {
 
 **Team**
 
-```json
+```javascript
 {
     "name": String,
     "cars": Car[],
@@ -43,7 +43,7 @@ interface Agent {
 
 **Car**
 
-```json
+```javascript
 {
     "position": Int[2],
     "capacity": Int,
@@ -54,7 +54,7 @@ interface Agent {
 
 **Customer**
 
-```json
+```javascript
 {
     "id": String,
     "position": Int[2] | null,
@@ -66,7 +66,7 @@ interface Agent {
 
 **Action**
 
-```json
+```javascript
 {
     "car": String,
     "direction": 0 | 1 | 2 | 3 | null
@@ -88,7 +88,7 @@ interface Agent {
 
 **Act**
 
-```json
+```javascript
 {
     "team": String,
     "actios": Action[],
@@ -97,7 +97,7 @@ interface Agent {
 
 **Step**
 
-```json
+```javascript
 {
     "state": Observation,
     "acts": Act[],
