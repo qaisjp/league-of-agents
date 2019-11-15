@@ -45,6 +45,7 @@ interface Agent {
 
 ```javascript
 {
+    "id": String
     "position": Int[2],
     "capacity": Int,
     "availableCapacity": Int,
