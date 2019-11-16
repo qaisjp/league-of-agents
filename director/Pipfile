@@ -9,7 +9,6 @@ verify_ssl = true
 names = "*"
 requests = "*"
 lxml = "*"
-heap = "*"
 
 [requires]
 python_version = "3.7"

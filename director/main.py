@@ -4,8 +4,8 @@ import argparse
 from datetime import datetime
 import signal
 import sys
-from .client import API
-from .agents.a_star import AStarAgent
+from client import API
+from agents.a_star import AStarAgent
 
 parser = argparse.ArgumentParser(description='League of Agents director')
 
@@ -46,19 +46,31 @@ def main():
         agents.append(agent)
     states = []
     acts = []
+    print("Setting up the signal handler...")
     def signal_handler(sig, frame):
         print('You pressed Ctrl+C!')
         print('Exiting...')
+        config = {
+            "agents": [{"type": a.agent_type, "name": a.get_name(), "team_id": a.get_team_id()} for a in agents]
+        }
+        replay = {
+            "config": config,
+            "steps": [{"state": states[i], "acts": acts[i]} for i in range(len(states))]
+        }
+        # Save the replay
         d = "-".join((str(datetime.now()).split()))
+        d = "_".join((str(datetime.now()).split(":")))
         replay_name = f"{len(agents)}-agents-{d}.json"
         with open(os.path.join("replays", replay_name), 'w') as outfile:
             json.dump(replay, outfile)
         print(f"Wrote replay to replays/{replay_name}")
         sys.exit(0)
     signal.signal(signal.SIGINT, signal_handler)
-    signal.pause()
+    print("Starting the game...")
     while True:
+        print("Getting the world...")
         world = api.get_world()
+        print("Done!")
         if not world:
             break
         current_tick = world["ticks"]
@@ -94,6 +106,7 @@ def main():
     }
     # Save the replay
     d = "-".join((str(datetime.now()).split()))
+    d = "_".join((str(datetime.now()).split(":")))
     replay_name = f"{len(agents)}-agents-{d}.json"
     with open(os.path.join("replays", replay_name), 'w') as outfile:
         json.dump(replay, outfile)
