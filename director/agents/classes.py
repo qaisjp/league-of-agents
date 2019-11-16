@@ -1,11 +1,11 @@
 import heapq
 
 class State():
-    def __init__(self, maps, team, customers):
-        self.maps = maps
-        self.team = team
+    def __init__(self, grid, teams, customers, ticks):
+        self.grid = grid
+        self.teams = teams
         self.customers = customers
-
+        self.ticks = ticks
 
 class Team():
     def __init__(self, id, name, cars, score):

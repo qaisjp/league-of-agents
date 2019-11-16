@@ -25,7 +25,7 @@ interface Agent {
 
 ```javascript
 {
-    "map": Bool[][],
+    "grid": Bool[][],
     "teams": Team[],
     "customers": Customer[],
     "ticks": Int,
