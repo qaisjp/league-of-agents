@@ -19,11 +19,24 @@ const CITY_TILE_INDEXES = {
     impassable: 1,
 };
 
+const viz = {}
+
+const clearUI = () => {
+    document.querySelector("#status").textContent = "";
+}
+
 const onSwitchLive = e => {
+    clearUI();
     if (e.target.checked) {
         alert("going to live")
+        viz.scenes.remove("replay-scene")
+        viz.scenes.add("live-scene", new LiveScene(visualsConfig))
+        viz.scenes.run("live-scene")
     } else {
         alert("leaving live")
+        viz.scenes.remove("live-scene")
+        viz.scenes.add("replay-scene", new ReplayScene(visualsConfig))
+        viz.scenes.run("replay-scene")
     }
 }
 
@@ -44,5 +57,6 @@ window.addEventListener("load", () => {
         parent: document.querySelector("#right"),
     };
 
-    const game = new Phaser.Game(phaserConfig);
+    viz.game = new Phaser.Game(phaserConfig);
+    viz.scenes = new Phaser.Scenes.SceneManager(viz.game);
 })

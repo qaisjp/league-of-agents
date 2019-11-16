@@ -1,10 +1,10 @@
-class LiveScene extends Phaser.Scene {
+class ReplayScene extends Phaser.Scene {
     constructor(config) {
         console.debug("constructor", config);
 
         // this is some information for phaser about our scene
         const sceneConfig = {
-            key: "live-scene",
+            key: "replay-scene",
         };
 
         super(sceneConfig);
@@ -36,6 +36,7 @@ class LiveScene extends Phaser.Scene {
         // the easiest. It stalls rendering, which isn't cool, but this is only
         // going to happen during the loading phase so probably nobody notices.
         this.retrieveCityConfig();
+        alert("preload replayscene")
     }
 
     async retrieveCityConfig() {
@@ -51,7 +52,7 @@ class LiveScene extends Phaser.Scene {
         console.debug("initial game state", data);
 
         if ("message" in data) {
-            document.querySelector("#status").textContent = data.message;
+            alert(data.message);
             return false;
         }
 
