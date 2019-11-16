@@ -12,10 +12,10 @@
 <body>
     <div id="left">
         <div id="controls">
-            <label>Frame <input type="number" style="width: 50px"></label>
+            <label>Frame <input id="frame-input" type="number" min="0" style="width: 50px"></label>
             <button>play</button>
             <button>pause</button>
-            <input type="range" name="frame-range" min="0" max="200">
+            <input type="range" id="frame-range" min="0" max="200">
             <button>slow down</button>
             <input type="number" style="width: 50px" min="50" step="50">
             <button>speed up</button>
@@ -28,13 +28,12 @@
         </select>
         <div style="margin-top: 1em; margin-bottom: 0.5em; display: flex; justify-content: space-between; align-items: center;">
             <strong>Replay JSON</strong>
-            <label><input type="checkbox" checked id="live"> Live Mode</label>
+            <div>
+                <button id="btn-reload">Reload</button>
+                <label><input type="checkbox" checked id="live"> Live Mode</label>
+            </div>
         </div>
-        <textarea style="flex-grow: 1;"></textarea>
-        <div style="display: flex; height: 100px; margin-top: 0.25em">
-            <button style="font-size: 3em; flex-grow: 1;">Choose file</button>
-            <button style="font-size: 3em; flex-grow: 1;">Apply</button>
-        </div>
+        <textarea style="flex-grow: 1;" id="codebox"></textarea>
     </div>
     <div id="right">
         <div style="margin-bottom: 0.5em;">Status: <span id="status"></span></div>
@@ -65,7 +64,8 @@
     #controls {
         display: flex;
     }
-    #controls > input[name="frame-range"] {
+
+    #controls > #frame-range {
         flex-grow: 1;
     }
 </style>
