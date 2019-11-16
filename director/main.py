@@ -30,8 +30,8 @@ def team_id_to_token(id, available_teams):
             return t["token"]
 
 def main():
-    # api = API()
-    api = API(base_url="https://citysimlocal.eu.ngrok.io/")
+    api = API()
+    # api = API(base_url="https://citysimlocal.eu.ngrok.io/")
     api.stop_game()
     args = parser.parse_args()
     data = json.load(args.i)
