@@ -155,7 +155,7 @@ def move_cars(api, token, world, previous_car_directions=None):
                 team_name, new_direction.name, repr(old_coordinates),
                 repr(new_coordinates))
 
-            api.move_car(car_id, new_direction, token)
+            api.move_car(car_id, new_direction.value, token)
 
             new_directions[car_id] = new_direction
 
