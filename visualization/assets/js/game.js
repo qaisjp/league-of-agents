@@ -233,6 +233,7 @@ window.addEventListener("load", () => {
             }
         },
         scene: [new ChallengeScene(visualsConfig)],
+        parent: document.querySelector("#top"),
     };
 
     const game = new Phaser.Game(phaserConfig);
