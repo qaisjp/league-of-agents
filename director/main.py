@@ -3,6 +3,7 @@ import os
 import argparse
 from datetime import datetime
 import signal
+import random
 from copy import copy
 import sys
 from json import JSONEncoder
@@ -29,7 +30,8 @@ def team_id_to_token(id, available_teams):
             return t["token"]
 
 def main():
-    api = API()
+    # api = API()
+    api = API(base_url="https://citysimlocal.eu.ngrok.io/")
     api.stop_game()
     args = parser.parse_args()
     data = json.load(args.i)
@@ -100,6 +102,7 @@ def main():
                     print(action.car_id, action.direction, team_id_to_token(a.get_team_id(), og_teams))
                     print(action.car_id)
                     print(action.direction)
+                    action.direction = random.randint(0,3)
                     api.move_car(action.car_id, action.direction, team_id_to_token(a.get_team_id(), og_teams))
         acts.append(act)
         while True:

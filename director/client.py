@@ -135,7 +135,8 @@ class API():
             grid[k].append(b)
 
         assert sum(map(len, grid)) == width * width
-
+        assert sum(map(sum, grid)) == sum(world["grid"])
+        
         observation = State(
             grid,
             list(map(their_team_to_ours, world["teams"].items())),
