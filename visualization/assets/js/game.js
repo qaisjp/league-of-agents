@@ -40,8 +40,39 @@ const onSwitchLive = e => {
     }
 }
 
+const onChooseFileDrop = async event => {
+    let files = event.dataTransfer.files;
+
+    if (files.length !== 1) {
+        alert("Expected exactly 1 file")
+        return
+    }
+
+    const file = files[0]
+    if (file.type !== "application/json") {
+        alert("File must be application/json")
+        return
+    }
+
+    const code = document.querySelector("#codebox")
+    code.textContent = await file.text();
+}
+
+const eventStopAndPrevent = event => {
+    event.stopPropagation()
+    event.preventDefault()
+}
+
 window.addEventListener("load", () => {
     document.querySelector("#live").addEventListener("change", onSwitchLive)
+
+    const code = document.querySelector("#codebox")
+
+    code.addEventListener("dragover", eventStopAndPrevent)
+    code.addEventListener("dragenter", eventStopAndPrevent)
+    code.addEventListener("drop", eventStopAndPrevent)
+    code.addEventListener("drop", onChooseFileDrop)
+
 
     const phaserConfig = {
         type: Phaser.AUTO,
