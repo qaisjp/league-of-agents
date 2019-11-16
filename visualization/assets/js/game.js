@@ -56,6 +56,22 @@ const onChooseFileDrop = async event => {
 
     const code = document.querySelector("#codebox")
     code.textContent = await file.text();
+
+    var obj = JSON.parse(code.textContent);
+
+    const maxVal = obj.steps.length
+    console.log(maxVal)
+    const minVal = 0
+
+    $(document).ready(function() {
+    $(".slider").attr({
+       "max" : maxVal,
+       "min" : minVal
+    });
+});
+
+
+
 }
 
 const eventStopAndPrevent = event => {
