@@ -63,11 +63,9 @@ const onChooseFileDrop = async event => {
     console.log(maxVal)
     const minVal = 0
 
-    $(document).ready(function() {
-    $(".slider").attr({
-       "max" : maxVal,
-       "min" : minVal
-    });
+    const slider = document.querySelector(".slider")
+    slider.setAttribute("max", maxVal)
+    slider.setAttribute("min", minVal)
 });
 
 
