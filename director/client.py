@@ -208,10 +208,11 @@ class API():
         for e in tr_elements:
             if e[1].text_content() == team_name:
                 token = e[2].text_content()
+                id = e[0].text_content()
 
         logging.info('Created team %s', team_name)
 
-        return token
+        return token, team_name, id
 
     def get_team_tokens(self):
         body = self.__send_get_request(self.url.admin)
