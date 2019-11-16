@@ -2,7 +2,7 @@
     "agents": [
         {
             "type": "A_STAR",
-            "name": "Yolo1"
+            "name": "Bezos"
         }
     ]
 }

@@ -78,13 +78,13 @@ class AStarAgent():
                     continue
 
                 n_cost = cost[curr] + 1
-                if neighbor not in cost or n_cost < cost[neighbor]:
+                if neighbor not in cost.keys() or n_cost < cost[neighbor]:
                     cost[neighbor] = n_cost
                     priority = n_cost + heuristic(neighbor, dest)
                     pq.push(neighbor, priority)
                     parent[neighbor] = curr
 
-        if dest not in parent:
+        if dest not in parent.keys():
             action = Action(car.id)
             return action
 
@@ -98,7 +98,6 @@ class AStarAgent():
             route = [prev] + route
             targ = prev
             prev = parent[prev]
-        print(route)
         if (targ[0] - prev[0]) == 0:
             if (targ[1] - prev[1] == 1):
                 action = Action(car.id, 2)
@@ -163,7 +162,6 @@ class AStarAgent():
 
 def Astar(car, dest, grid):
     directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
-    # directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
     start = car.position
 
     pq = PriorityQueue()
@@ -180,7 +178,7 @@ def Astar(car, dest, grid):
         if curr == dest:
             break
 
-        for i, dir in enumerate(directions):
+        for dir in directions:
             neighbor = add(curr, dir)
             if neighbor[0] < 0:
                 continue
@@ -194,13 +192,13 @@ def Astar(car, dest, grid):
                 continue
 
             n_cost = cost[curr] + 1
-            if neighbor not in cost or n_cost < cost[neighbor]:
+            if neighbor not in cost.keys() or n_cost < cost[neighbor]:
                 cost[neighbor] = n_cost
                 priority = n_cost + heuristic(neighbor, dest)
                 pq.push(neighbor, priority)
                 parent[neighbor] = curr
 
-    if dest not in parent:
+    if dest not in parent.keys():
         return len(grid)*10
     return cost[dest]
 

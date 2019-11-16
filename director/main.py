@@ -3,7 +3,6 @@ import os
 import time
 import argparse
 from datetime import datetime
-import pickle
 import signal
 import random
 from copy import copy
@@ -92,8 +91,6 @@ def main():
         for a in agents:
             # print("Acting...")
             w = api.get_world(team_id_to_token(a.get_team_id(), og_teams))
-            with open('obs.pickle', 'wb') as handle:
-                pickle.dump(w, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
             actions = a.act(w)
             act.append({

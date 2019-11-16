@@ -133,6 +133,7 @@ class API():
                 # curr = grid[:-1]
             # print(b)
             grid[k].append(b)
+        grid = list(reversed(grid))
 
         assert sum(map(len, grid)) == width * width
         assert sum(map(sum, grid)) == sum(world["grid"])
