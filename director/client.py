@@ -94,6 +94,7 @@ class API():
             return False
 
         width = world["width"]
+        assert width == world["height"]
 
         def their_customer_to_ours(tupl):
             idx, c = tupl
@@ -129,6 +130,8 @@ class API():
                 # curr = grid[:-1]
             # print(b)
             grid[k].append(b)
+
+        assert sum(map(len, grid)) == width * width
 
         observation = State(
             grid,
