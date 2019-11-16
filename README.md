@@ -50,7 +50,7 @@ interface Agent {
     "id": String
     "position": Int[2],
     "capacity": Int,
-    "availableCapacity": Int,
+    "available_capacity": Int,
     "customers": String[],
 }
 ```

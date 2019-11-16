@@ -16,10 +16,10 @@ class Team():
 
 
 class Car():
-    def __init__(self, position, capacity, availableCapacity, customers):
+    def __init__(self, position, capacity, available_capacity, customers):
         self.position = position
         self.capacity = capacity
-        self.availableCapacity = availableCapacity
+        self.available_capacity = available_capacity
         self.customers = customers
 
 
@@ -48,4 +48,3 @@ class PriorityQueue():
 
     def pop(self):
         return heapq.heappop(self.elems)[1]
-
