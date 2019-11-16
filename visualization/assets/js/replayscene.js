@@ -80,7 +80,7 @@ class ReplayScene extends Phaser.Scene {
             for (const car of team.cars) {
                 const x = car.position[0]
                 const y = car.position[1]
-                grid[x][y] = 3 + Number.parseInt(team.id);
+                grid[y][x] = 3 + Number.parseInt(team.id);
             }
         }
         return grid;
