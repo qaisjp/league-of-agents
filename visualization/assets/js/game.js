@@ -45,6 +45,11 @@ const onSwitchLive = e => {
 const applyStep = id => {
     clearStepUI()
 
+    if (viz.live) {
+        alert("not applying step because live")
+        return
+    }
+
     if (!Number.isFinite(id)) {
         alert("step ID must be a (finite) number")
         return
@@ -61,19 +66,22 @@ const applyStep = id => {
     }
 
     const step = viz.data.steps[id]
+    step.id = id
     const teamsEl = viz.el.teams
     for (const team of step.state.teams) {
         const opt = document.createElement("option");
         opt.text = team.name;
         teamsEl.add(opt)
     }
+
+    viz.scene.step = step
 }
 
 const apply = () => {
     const obj = JSON.parse(viz.el.code.value);
     viz.data = obj;
 
-    const maxVal = obj.steps.length
+    const maxVal = obj.steps.length - 1
 
     viz.el.slider.setAttribute("max", maxVal)
     viz.el.slider.value = "0"
