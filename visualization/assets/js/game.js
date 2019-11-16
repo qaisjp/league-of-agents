@@ -40,7 +40,27 @@ const onSwitchLive = e => {
     }
 }
 
+const apply = () => {
+    const code = document.querySelector("#codebox")
+    const obj = JSON.parse(code.value);
+
+    const maxVal = obj.steps.length
+    console.log(maxVal)
+
+    const slider = document.querySelector("#frame-range")
+    slider.setAttribute("max", maxVal)
+    slider.value = "0"
+
+    const frameInput = document.querySelector("#frame-input")
+    frameInput.setAttribute("max", maxVal)
+    frameInput.value = "0"
+
+}
+
 const onChooseFileDrop = async event => {
+    event.stopPropagation()
+    event.preventDefault()
+
     let files = event.dataTransfer.files;
 
     if (files.length !== 1) {
@@ -55,17 +75,9 @@ const onChooseFileDrop = async event => {
     }
 
     const code = document.querySelector("#codebox")
-    code.textContent = await file.text();
+    code.value = await file.text();
 
-    var obj = JSON.parse(code.textContent);
-
-    const maxVal = obj.steps.length
-    console.log(maxVal)
-    const minVal = 0
-
-    const slider = document.querySelector(".slider")
-    slider.setAttribute("max", maxVal)
-    slider.setAttribute("min", minVal)
+    apply()
 }
 
 const eventStopAndPrevent = event => {
@@ -77,12 +89,12 @@ window.addEventListener("load", () => {
     document.querySelector("#live").addEventListener("change", onSwitchLive)
 
     const code = document.querySelector("#codebox")
-
     code.addEventListener("dragover", eventStopAndPrevent)
     code.addEventListener("dragenter", eventStopAndPrevent)
-    code.addEventListener("drop", eventStopAndPrevent)
     code.addEventListener("drop", onChooseFileDrop)
 
+    const reload = document.querySelector("#btn-reload")
+    reload.addEventListener("click", apply)
 
     const phaserConfig = {
         type: Phaser.AUTO,
