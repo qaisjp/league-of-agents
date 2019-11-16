@@ -28,6 +28,7 @@ interface Agent {
     "map": Bool[][],
     "teams": Team[],
     "customers": Customer[],
+    "ticks": Int,
 }
 ```
 
@@ -80,8 +81,20 @@ interface Agent {
 
 ```go
 interface Agent {
-    getWorld() -> Observation
-    moveCar(string team_name, string car_id, int direction) -> void
+    init(string base_url) -> API
+    get_world() -> Observation
+    move_car(string car_id, int direction, string token) -> void
+    get_team_tokens() -> TeamToken[]
+}
+```
+
+**TeamToken**
+
+```javascript
+{
+    "id": Int,
+    "name": String,
+    "token": String,
 }
 ```
 

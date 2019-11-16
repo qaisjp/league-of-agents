@@ -213,6 +213,28 @@ class API():
 
         return token
 
+    def get_team_tokens(self):
+        body = self.__send_get_request(self.url.admin)
+
+        # Store the contents of the website under doc
+        doc = lh.fromstring(body.text)
+        if body.text.strip() == "Game already running, wait until stops":
+            raise GameRunningError()
+
+        tr_elements = doc.xpath('//tr')
+        assert tr_elements[0][0].text_content().strip() == "Team ID"
+        assert tr_elements[0][1].text_content().strip() == "Team Name"
+        assert tr_elements[0][2].text_content().strip() == "Token"
+
+        tokens = []
+        for e in tr_elements[1:]:
+            tokens.append({
+                "id": e[0].text_content().strip(),
+                "name": e[1].text_content().strip(),
+                "token": e[2].text_content().strip(),
+            })
+        return tokens
+
     def move_car(self, car_id, direction, token):
         logging.debug('Moving car ID %d to the %s', car_id, direction.name)
         request_content = json.dumps({
@@ -379,6 +401,8 @@ def main():
     except GameRunningError:
         api.stop_game()
         token = api.create_team()
+
+    print(api.get_team_tokens())
 
     api.start_game()
     world = api._get_world_legacy()
