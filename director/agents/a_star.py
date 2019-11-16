@@ -42,7 +42,7 @@ class AStarAgent():
         return actions
 
     def Astar(self, car, dest, map):
-        directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+        directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
         start = car.position
 
         pq = PriorityQueue()
@@ -83,25 +83,29 @@ class AStarAgent():
             action = Action(car.id)
             return action
 
-        bt = dest
-        targ = start
-        while not bt == start:
-            targ = bt
-            bt = parent[bt]
+        if dest == start:
+            action = Action(car.id)
+            return action
 
-        if (targ[0] - bt[0]) == 0:
-            if (targ[1] - bt[1] == 1):
-                action = Action(car.id, 0)
-                return action
-            else:
-                action = Action(car.id, 2)
-                return action
-        else:
-            if (targ[0] - bt[0] == 1):
+        prev = dest
+        targ = None
+        while not prev == start:
+            targ = prev
+            prev = parent[prev]
+
+        if (targ[0] - prev[0]) == 0:
+            if (targ[1] - prev[1] == 1):
                 action = Action(car.id, 1)
                 return action
             else:
                 action = Action(car.id, 3)
+                return action
+        else:
+            if (targ[0] - prev[0] == 1):
+                action = Action(car.id, 0)
+                return action
+            else:
+                action = Action(car.id, 2)
                 return action
 
         action = Action(car.id)
