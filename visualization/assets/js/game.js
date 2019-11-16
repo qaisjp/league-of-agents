@@ -75,6 +75,9 @@ const applyStep = id => {
         teamsEl.add(opt)
     }
 
+    viz.el.frameInput.value = id
+    viz.el.slider.value = id
+
     viz.scene.step = step
 }
 
@@ -151,6 +154,19 @@ const togglePlayPause = () => {
     setPaused(null)
 }
 
+const onUpdateInterval = e => {
+    if (e.target.textContent.length > 0) {
+        const direction = (e.target.textContent === "speed up") ? -1 : 1
+        visualsConfig.updateInterval += 50 * direction
+        if (visualsConfig.updateInterval <= 0) {
+            visualsConfig.updateInterval = 50
+        }
+        viz.el.gamespeed.value = visualsConfig.updateInterval
+    } else {
+        visualsConfig.updateInterval = e.target.value
+    }
+}
+
 window.addEventListener("load", () => {
     viz.el = {}
     viz.el.teams = document.querySelector("#teams")
@@ -173,6 +189,15 @@ window.addEventListener("load", () => {
 
     viz.el.reload = document.querySelector("#btn-reload")
     viz.el.reload.addEventListener("click", apply)
+
+    viz.el.gamespeed = document.querySelector("#gamespeed")
+    viz.el.gamespeed.value = visualsConfig.updateInterval
+    viz.el.gamespeed.addEventListener("change", onUpdateInterval)
+
+    viz.el.gamespeeddown = document.querySelector("#gamespeeddown")
+    viz.el.gamespeeddown.addEventListener("click", onUpdateInterval)
+    viz.el.gamespeedup = document.querySelector("#gamespeedup")
+    viz.el.gamespeedup.addEventListener("click", onUpdateInterval)
 
     loadGame(new LiveScene(visualsConfig))
 })
