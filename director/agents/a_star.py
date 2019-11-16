@@ -94,7 +94,7 @@ class AStarAgent():
         for (i, car) in enumerate(cars):
 
             # Car is carrying a customer
-            if (car.availableCapacity < car.capacity):
+            if (car.available_capacity < car.capacity):
                 assign[i] = (i, car.customers[0].destination)
 
             # Car is searching for a customer

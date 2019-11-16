@@ -2,8 +2,10 @@ import json
 import os
 import argparse
 from datetime import datetime
-from client import API
-from agents.a_star import AStarAgent
+import signal
+import sys
+from .client import API
+from .agents.a_star import AStarAgent
 
 parser = argparse.ArgumentParser(description='League of Agents director')
 
@@ -44,6 +46,17 @@ def main():
         agents.append(agent)
     states = []
     acts = []
+    def signal_handler(sig, frame):
+        print('You pressed Ctrl+C!')
+        print('Exiting...')
+        d = "-".join((str(datetime.now()).split()))
+        replay_name = f"{len(agents)}-agents-{d}.json"
+        with open(os.path.join("replays", replay_name), 'w') as outfile:
+            json.dump(replay, outfile)
+        print(f"Wrote replay to replays/{replay_name}")
+        sys.exit(0)
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.pause()
     while True:
         world = api.get_world()
         if not world:

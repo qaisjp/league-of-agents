@@ -19,7 +19,7 @@ class Car():
     def __init__(self, position, capacity, availableCapacity, customers):
         self.position = position
         self.capacity = capacity
-        self.availableCapacity = availableCapacity
+        self.available_capacity = availableCapacity
         self.customers = customers
 
 
