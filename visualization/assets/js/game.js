@@ -4,7 +4,7 @@ const visualsConfig = {
 // @serverAddr: Address of the server to connect to, eg. 'http://localhost:8000'
 //              If empty, uses the same server the visualization is hosted on.
     serverAddr: "http://localhost:8080",
-    updateInterval: 50, // ms
+    updateInterval: 500, // ms
     resolution: {
         x: 1080,
         y: 1080,
@@ -19,7 +19,10 @@ const CITY_TILE_INDEXES = {
     impassable: 1,
 };
 
-const viz = {}
+const viz = {
+    live: true,
+    scene: null
+}
 
 const clearUI = () => {
     document.querySelector("#status").textContent = ""
@@ -32,17 +35,11 @@ const clearStepUI = () => {
 
 const onSwitchLive = e => {
     clearUI();
-    if (e.target.checked) {
-        alert("going to live")
-        viz.scenes.remove("replay-scene")
-        viz.scenes.add("live-scene", new LiveScene(visualsConfig))
-        viz.scenes.run("live-scene")
-    } else {
-        alert("leaving live")
-        viz.scenes.remove("live-scene")
-        viz.scenes.add("replay-scene", new ReplayScene(visualsConfig))
-        viz.scenes.run("replay-scene")
-    }
+
+    viz.live = e.target.checked
+
+    const newScene = viz.live ? new LiveScene(visualsConfig) : new ReplayScene(visualsConfig)
+    loadGame(newScene)
 }
 
 const applyStep = id => {
@@ -131,7 +128,8 @@ window.addEventListener("load", () => {
     viz.el.slider.addEventListener("input", onSliderInput)
     viz.el.slider.addEventListener("change", onSliderChange)
 
-    document.querySelector("#live").addEventListener("change", onSwitchLive)
+    viz.el.live = document.querySelector("#live")
+    viz.el.live.addEventListener("change", onSwitchLive)
 
     viz.el.code = document.querySelector("#codebox")
     viz.el.code.addEventListener("dragover", eventStopAndPrevent)
@@ -140,6 +138,18 @@ window.addEventListener("load", () => {
 
     viz.el.reload = document.querySelector("#btn-reload")
     viz.el.reload.addEventListener("click", apply)
+
+    loadGame(new LiveScene(visualsConfig))
+})
+
+const loadGame = scene => {
+    if (viz.game != null) {
+        viz.game.destroy(true)
+        viz.game = null;
+        setTimeout(loadGame.bind(null, scene))
+        return
+    }
+
 
     const phaserConfig = {
         type: Phaser.AUTO,
@@ -151,10 +161,10 @@ window.addEventListener("load", () => {
                 debug: true     // TODO
             }
         },
-        scene: [new LiveScene(visualsConfig)],
+        scene: [scene],
         parent: document.querySelector("#right"),
     };
 
     viz.game = new Phaser.Game(phaserConfig);
-    viz.scenes = new Phaser.Scenes.SceneManager(viz.game);
-})
+    viz.scene = scene
+}
