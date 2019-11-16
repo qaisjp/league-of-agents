@@ -95,8 +95,10 @@ def main():
                 "actions": actions
             })
             for action in actions:
+                print(vars(action))
                 if action.direction and action.direction != -1:
                     print("Moving a car")
+                    print(action.car_id, action.direction, team_id_to_token(a.get_team_id(), og_teams))
                     print(action.car_id)
                     print(action.direction)
                     api.move_car(action.car_id, action.direction, team_id_to_token(a.get_team_id(), og_teams))

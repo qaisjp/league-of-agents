@@ -122,6 +122,9 @@ class AStarAgent():
 
             # Car is carrying a customer
             if (car.available_capacity < car.capacity):
+                print(vars(car))
+                print(assign)
+                print(car.customers)
                 assign[i] = (i, car.customers[0].destination)
 
             # Car is searching for a customer
