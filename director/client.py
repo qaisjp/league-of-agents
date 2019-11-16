@@ -98,18 +98,19 @@ class API():
 
         def their_customer_to_ours(tupl):
             idx, c = tupl
-            return Customer(
+            c = Customer(
                 idx,
-                index_to_coordinates(width, c["origin"]),
-                index_to_coordinates(width, c["destination"])
+                index_to_coordinates(c["origin"], width),
+                index_to_coordinates(c["destination"], width)
             )
+            return c
 
         def their_cars_to_our_teamcars(cars, carcustomers):
             teamcars = defaultdict(list)
             for idx, c in cars.items():
                 our_c = Car(
                     idx,
-                    index_to_coordinates(width, c["position"]),
+                    index_to_coordinates(c["position"], width),
                     c["capacity"],
                     c["capacity"] - c["used_capacity"],
                     carcustomers[idx],
@@ -210,8 +211,8 @@ class API():
             'type': 'move',
             'action': {
                 'message': 'Moving car ID %s to the %s' % (car_id, direction),
-                'carId': int(car_id),
-                'moveDirection': direction
+                'CarId': int(car_id),
+                'MoveDirection': direction
             }
         })
         self.__send_post_request(self.url.actions, request_content, token)

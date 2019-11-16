@@ -81,7 +81,6 @@ class AStarAgent():
                     parent[neighbor] = curr
                     if curr == start:
                         final_dir = i
-
         action = Action(car.id, final_dir)
         return action
 
@@ -126,7 +125,7 @@ class AStarAgent():
             for i in range(len(customers)):
                 distances[min_car][i] = float("Inf")
             seeking_cars -= 1
-
+        # print(assign)
         return assign
 
 
