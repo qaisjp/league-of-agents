@@ -1,5 +1,5 @@
-
 from .classes import State, Team, Car, Customer, Action, PriorityQueue
+
 
 class AStarAgent():
     agent_type = "A_STAR"
@@ -26,7 +26,7 @@ class AStarAgent():
         # print(teams)
         # print(customers)
         # print(team)
-        if(len(customers) == 0):
+        if (len(customers) == 0):
             print("No customer")
             actions = []
             for c in cars:
@@ -102,10 +102,10 @@ class AStarAgent():
                 return action
         else:
             if (targ[0] - prev[0] == 1):
-                action = Action(car.id, 0)
+                action = Action(car.id, 2)
                 return action
             else:
-                action = Action(car.id, 2)
+                action = Action(car.id, 0)
                 return action
 
         action = Action(car.id)
@@ -140,7 +140,8 @@ class AStarAgent():
                 seeking_cars += 1
                 for (j, customer) in enumerate(customers):
                     # distances[i][j] = self.Astar(car, customer.position, map)
-                    distances[i][j] = heuristic(car.position, customer.position)
+                    distances[i][j] = heuristic(car.position,
+                                                customer.position)
 
         # Finds the (car, customer) pairs with the minimum
         # distance and adds them to assigned destinations
