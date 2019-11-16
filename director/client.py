@@ -169,6 +169,7 @@ class API():
             "map": [],
             "teams": list(map(their_team_to_ours, world["teams"].items())),
             "customers": list(map(their_customer_to_ours, world["customers"].items())),
+            "ticks": world["ticks"]
         }
 
         # Fill team.cars

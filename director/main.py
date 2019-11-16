@@ -2,6 +2,7 @@ import json
 import os
 import argparse
 from datetime import datetime
+from client import API
 
 parser = argparse.ArgumentParser(description='League of Agents director')
 
@@ -26,33 +27,41 @@ class AStarAgent:
         return []
 
 
-def create_agent(t, team_name):
+def create_agent(t, team_name, team_id):
     if(t == "A_STAR"):
-        a = AStarAgent(team_name)
+        a = AStarAgent(team_name, team_id)
         return a
 
+def team_id_to_token(id, available_teams):
+    for t in available_teams:
+        if t["id"] == id:
+            return t["token"]
 
 def main():
+    api = API()
     args = parser.parse_args()
     data = json.load(args.i)
     agents = []
-    available_teams = []  # dummy for now
-    if(len(available_teams) < agents):
-        available_teams.append()  # add the team created by the api later
-    # api.start_game()
+    available_teams = api.  # dummy for now
+    # if(len(available_teams) < agents):
+    #     available_teams.append()  # add the team created by the api later
+    api.start_game()
     for a in data["agents"]:
+        print(f"Creating {a['name']}")
         team = available_teams.pop()
         agent = create_agent(a["type"], a["name"], team["id"])
         agents.append(agent)
     states = []
     acts = []
     while True:
-        world = {}  # api.get_world()
+        world = api.get_world()
         if not world:
             break
+        current_tick = world["ticks"]
         states.append(world)
         act = []
         for a in agents:
+            print("Acting...")
             actions = a.act(world)
             act.append({
                 "team": a.get_team_id(),
@@ -60,11 +69,16 @@ def main():
             })
             for action in actions:
                 if action.direction:
-                    #api.move_car(a.get_team_id(), action.car, action.direction)
-                    pass
+                    api.move_car(action.car, action.direction, team_id_to_token(a.get_team_id(), available_teams))
         acts.append(act)
-        # TODO: wait for the tick to pass
-
+        while True:
+            print("Waiting for tick...")
+            w = api.get_world()
+            print(w, current_tick)
+            if not w:
+                break
+            if w["ticks"] is not current_tick:
+                break
     print("Game is done")
     # Let's create the game config
     config = {
@@ -76,7 +90,7 @@ def main():
     }
     # Save the replay
     d = "-".join((str(datetime.now()).split()))
-    replay_name = f"{len(agents)}-agents-{d}"
+    replay_name = f"{len(agents)}-agents-{d}.json"
     with open(os.path.join("replays", replay_name), 'w') as outfile:
         json.dump(replay, outfile)
     print(f"Wrote replay to replays/{replay_name}")
