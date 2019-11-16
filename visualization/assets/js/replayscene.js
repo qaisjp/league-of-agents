@@ -1,5 +1,5 @@
 class ReplayScene extends Phaser.Scene {
-    constructor(config) {
+    constructor(config, applyNextStep) {
         console.debug("constructor", config);
 
         // this is some information for phaser about our scene
@@ -10,10 +10,11 @@ class ReplayScene extends Phaser.Scene {
         super(sceneConfig);
 
         this.config = config;
+        this.applyNextStep = applyNextStep;
 
-        this.data = {
+        this.viz = {
             lastUpdate: 0,
-            updating: false,
+            state: "paused",
             city: null, // this will hold the latest data retrieved from server
         };
 
@@ -26,11 +27,13 @@ class ReplayScene extends Phaser.Scene {
         this.load.image('city-tiles', 'assets/elements.png');
     }
 
-    create() {}
+    create() {
+
+    }
 
     updateSize(width) {
         console.debug("create");
-        this.data.width = width
+        this.viz.width = width
 
         this.map = this.make.tilemap({
             width: width,
@@ -57,21 +60,41 @@ class ReplayScene extends Phaser.Scene {
         return grid.map(a => a.map(getCityGridTile));
     }
 
-    getCustomerGridTiles(customers, grid) {
-        function getCustomerPosition(customer) {
-            if (customer.status == "waiting") {
-                return customer.origin;
-            } else if (customer.status == "delivered")  {
-                return customer.destination;
-            } else {
-                return;
+    getCustomerGridTiles(state, grid) {
+        const customers = state.customers;
+        const filtered = [];
+
+        for (const team of state.teams) {
+            for (const car of team.cars) {
+                for (const customer of car.customers) {
+                    filtered.push(customer);
+                }
             }
         }
-        for (var key in customers) {
-            if (getCustomerPosition(customers[key])) {
-                grid[getCustomerPosition(customers[key])] = 2;
+        // function getCustomerPosition(customer) {
+        //     if (customer.status == "waiting") {
+        //         return customer.origin;
+        //     } else if (customer.status == "delivered")  {
+        //         return customer.destination;
+        //     } else {
+        //         return;
+        //     }
+        // }
+
+        for (const customer of customers) {
+            if (filtered.includes(customer.id)) {
+                continue;
             }
+            const x = customer.position[0];
+            const y = customer.position[1];
+            grid[y][x] = 2;
         }
+
+        // for (var key in customers) {
+        //     if (getCustomerPosition(customers[key])) {
+        //         grid[getCustomerPosition(customers[key])] = 2;
+        //     }
+        // }
         return grid;
     }
 
@@ -87,6 +110,13 @@ class ReplayScene extends Phaser.Scene {
     }
 
     update(time, delta) {
+        if (this.viz.state === "playing") {
+            if ((time - this.viz.lastUpdate) > this.config.updateInterval) {
+                this.viz.lastUpdate = time;
+                this.applyNextStep()
+            }
+        }
+
         if (!this.step) {
             console.warn("not update — this.step does not exist")
             return
@@ -99,12 +129,12 @@ class ReplayScene extends Phaser.Scene {
 
         this.currentStepID = this.step.id
 
-        if (this.step.state.grid.length !== this.data.width) {
+        if (this.step.state.grid.length !== this.viz.width) {
             this.updateSize(this.step.state.grid.length)
         }
 
         let gridTiles = this.getCityGridTiles(this.step.state.grid);
-        gridTiles = this.getCustomerGridTiles(this.step.state.customers, gridTiles)
+        gridTiles = this.getCustomerGridTiles(this.step.state, gridTiles)
         gridTiles = this.getCarGridTiles(this.step.state.teams, gridTiles)
 
         this.map.putTilesAt(gridTiles, 0, 0, false, "city-layer");

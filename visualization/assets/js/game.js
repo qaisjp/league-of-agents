@@ -21,7 +21,8 @@ const CITY_TILE_INDEXES = {
 
 const viz = {
     live: true,
-    scene: null
+    scene: null,
+    data: null
 }
 
 const clearUI = () => {
@@ -38,7 +39,7 @@ const onSwitchLive = e => {
 
     viz.live = e.target.checked
 
-    const newScene = viz.live ? new LiveScene(visualsConfig) : new ReplayScene(visualsConfig)
+    const newScene = viz.live ? new LiveScene(visualsConfig) : new ReplayScene(visualsConfig, applyNextStep)
     loadGame(newScene)
 }
 
@@ -77,6 +78,15 @@ const applyStep = id => {
     viz.scene.step = step
 }
 
+const setPaused = state => {
+    if (state === null) {
+        state = viz.scene.viz.state === "playing"
+    }
+
+    viz.scene.viz.state = state ? "paused" : "playing"
+    viz.el.playpause.textContent = state ? "play" : "pause"
+}
+
 const apply = () => {
     const obj = JSON.parse(viz.el.code.value);
     viz.data = obj;
@@ -89,7 +99,17 @@ const apply = () => {
     viz.el.frameInput.setAttribute("max", maxVal)
     viz.el.frameInput.value = "0"
 
+    setPaused(true)
     applyStep(0)
+}
+
+const applyNextStep = () => {
+    console.log("applying next step");
+    let next = viz.scene.step.id + 1
+    if (next >= viz.data.steps.length) {
+        next = 0
+    }
+    applyStep(next)
 }
 
 const onChooseFileDrop = async event => {
@@ -127,10 +147,17 @@ const onSliderInput = event => {
     viz.el.frameInput.value = event.target.value
 }
 
+const togglePlayPause = () => {
+    setPaused(null)
+}
+
 window.addEventListener("load", () => {
     viz.el = {}
     viz.el.teams = document.querySelector("#teams")
     viz.el.frameInput = document.querySelector("#frame-input")
+
+    viz.el.playpause = document.querySelector("#playpause")
+    viz.el.playpause.addEventListener("click", togglePlayPause)
 
     viz.el.slider = document.querySelector("#frame-range")
     viz.el.slider.addEventListener("input", onSliderInput)
@@ -157,7 +184,6 @@ const loadGame = scene => {
         setTimeout(loadGame.bind(null, scene))
         return
     }
-
 
     const phaserConfig = {
         type: Phaser.AUTO,
