@@ -16,7 +16,8 @@ class Team():
 
 
 class Car():
-    def __init__(self, position, capacity, available_capacity, customers):
+    def __init__(self, id, position, capacity, available_capacity, customers):
+        self.id = id
         self.position = position
         self.capacity = capacity
         self.available_capacity = available_capacity
