@@ -184,11 +184,11 @@ def Astar(car, dest, grid):
             neighbor = add(curr, dir)
             if neighbor[0] < 0:
                 continue
-            if neighbor[0] >= len(grid) + 1: #TODO
+            if neighbor[0] >= len(grid): #TODO
                 continue
             if neighbor[1] < 0:
                 continue
-            if neighbor[1] >= len(grid[0]) + 1: #TODO
+            if neighbor[1] >= len(grid[0]): #TODO
                 continue
             if grid[neighbor[1]][neighbor[0]] == False:
                 continue
