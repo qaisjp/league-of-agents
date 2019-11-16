@@ -3,9 +3,12 @@ import enum
 import random
 import time
 
-from client import API, coordinates_to_index, GameRunningError, index_to_coordinates
+from client import API, GameRunningError, index_to_coordinates
 
 LOG_LEVEL = logging.INFO
+
+def coordinates_to_index(x, y, width):
+    return x + width * (y - width + 1)
 
 # TODO move into CarDirection
 def get_position_after_move(from_x, from_y, direction):

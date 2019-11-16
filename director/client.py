@@ -24,9 +24,6 @@ def index_to_coordinates(index, width):
     y = index // width
     return x, width - y - 1
 
-# def coordinates_to_index(x, y, width):
-#     return x + width * (y - width + 1) 
-
 class Endpoints():
     def __init__(self, base_url):
         super().__init__()
