@@ -126,7 +126,6 @@ class API():
             if i % width == 0:
                 grid.append([])
                 k += 1
-                print("append")
                 # curr = grid[:-1]
             # print(b)
             grid[k].append(b)
@@ -203,13 +202,13 @@ class API():
         return tokens
 
     def move_car(self, car_id, direction, token):
-        logging.debug('Moving car ID %d to the %s', car_id, direction.name)
+        logging.debug('Moving car ID %d to the %s', car_id, direction)
         request_content = json.dumps({
             'type': 'move',
             'action': {
-                'message': 'Moving car ID %s to the %s' % (car_id, direction.name),
+                'message': 'Moving car ID %s to the %s' % (car_id, direction),
                 'carId': int(car_id),
-                'moveDirection': direction.value
+                'moveDirection': direction
             }
         })
         self.__send_post_request(self.url.actions, request_content, token)

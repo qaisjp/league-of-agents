@@ -85,8 +85,11 @@ def main():
                 "actions": actions
             })
             for action in actions:
-                if action.direction:
-                    api.move_car(action.car, action.direction, team_id_to_token(a.get_team_id(), available_teams))
+                if action.direction and action.direction != -1:
+                    print("Moving a car")
+                    print(action.car_id)
+                    print(action.direction)
+                    api.move_car(action.car_id, action.direction, team_id_to_token(a.get_team_id(), available_teams))
         acts.append(act)
         while True:
             print("Waiting for tick...")

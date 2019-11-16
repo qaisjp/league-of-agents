@@ -22,14 +22,23 @@ class AStarAgent():
 
         team = [t for t in teams if t.id == self.id][0]
         cars = team.cars
-
+        # print(map)
+        # print(teams)
+        # print(customers)
+        # print(team)
+        if(len(customers) == 0):
+            print("No customer")
+            actions = []
+            for c in cars:
+                actions.append(Action(c.id))
+            return actions
         # Find closest pairs between cars and customers
         assign = self.findPairs(cars, customers, map)
 
         actions = []
-        for (car, dest) in assign:
+        for (car_index, dest) in assign:
+            car = cars[car_index]
             actions += [self.Astar(car, dest, map)]
-
         return actions
 
     def Astar(self, car, dest, map):
@@ -101,12 +110,18 @@ class AStarAgent():
             else:
                 seeking_cars += 1
                 for (j, customer) in enumerate(customers):
-                    distances[i][j] = self.Astar(car, customer.position, map)
+                    # distances[i][j] = self.Astar(car, customer.position, map)
+                    distances[i][j] = heuristic(car.position, customer.position)
 
         # Finds the (car, customer) pairs with the minimum
         # distance and adds them to assigned destinations
+        # print(map)
         while (seeking_cars > 0):
             min_car, min_customer = min_pair(distances)
+            # print(assign)
+            # print(min_car)
+            # print(min_customer)
+            # print(customers)
             assign[min_car] = (min_car, customers[min_customer].position)
             for i in range(len(customers)):
                 distances[min_car][i] = float("Inf")
@@ -118,13 +133,18 @@ class AStarAgent():
 # Helpers for Agent class
 def min_pair(distances):
     min_dist = float("Inf")
-    min_car = 0
+    min_car = None
     min_customer = 0
     for (car, dists) in enumerate(distances):
         for (customer, dist) in enumerate(dists):
+            # print("yo")
+            # print(distances)
+            # print(distances[car][customer])
             if distances[car][customer] < min_dist:
                 min_car = car
                 min_customer = customer
+    if min_car is None:
+        raise Exception("Min car is none")
     return min_car, min_customer
 
 
