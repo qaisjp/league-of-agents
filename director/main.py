@@ -4,6 +4,10 @@ import argparse
 from datetime import datetime
 import signal
 import sys
+from json import JSONEncoder
+class MyEncoder(JSONEncoder):
+    def default(self, o):
+        return o.__dict__   
 from client import API
 from agents.a_star import AStarAgent
 
@@ -63,22 +67,22 @@ def main():
         d = "_".join((str(datetime.now()).split(":")))
         replay_name = f"{len(agents)}-agents-{d}.json"
         with open(os.path.join("replays", replay_name), 'w') as outfile:
-            json.dump(replay, outfile)
+            json.dump(replay, outfile, cls=MyEncoder)
         print(f"Wrote replay to replays/{replay_name}")
         sys.exit(0)
     signal.signal(signal.SIGINT, signal_handler)
     print("Starting the game...")
     while True:
-        print("Getting the world...")
+        # print("Getting the world...")
         world = api.get_world()
-        print("Done!")
+        # print("Done!")
         if not world:
             break
         current_tick = world.ticks
         states.append(world)
         act = []
         for a in agents:
-            print("Acting...")
+            # print("Acting...")
             actions = a.act(world)
             act.append({
                 "team": a.get_team_id(),
@@ -92,9 +96,9 @@ def main():
                     api.move_car(action.car_id, action.direction, team_id_to_token(a.get_team_id(), available_teams))
         acts.append(act)
         while True:
-            print("Waiting for tick...")
+            # print("Waiting for tick...")
             w = api.get_world()
-            print(w, current_tick)
+            # print(w, current_tick)
             if not w:
                 break
             if w.ticks is not current_tick:
