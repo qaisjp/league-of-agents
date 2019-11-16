@@ -4,7 +4,7 @@ const visualsConfig = {
 // @serverAddr: Address of the server to connect to, eg. 'http://localhost:8000'
 //              If empty, uses the same server the visualization is hosted on.
     serverAddr: "http://localhost:8080",
-    updateInterval: 1000, // ms
+    updateInterval: 50, // ms
     resolution: {
         x: 1280,
         y: 1100,

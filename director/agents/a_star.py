@@ -48,6 +48,7 @@ class AStarAgent():
         directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
         # directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
         start = car.position
+        route = []
 
         pq = PriorityQueue()
         pq.push(start, 0)
@@ -73,7 +74,7 @@ class AStarAgent():
                     continue
                 if neighbor[1] >= len(grid[0]):
                     continue
-                if grid[neighbor[0]][neighbor[1]] == False:
+                if grid[neighbor[1]][neighbor[0]] == False:
                     continue
 
                 n_cost = cost[curr] + 1
@@ -94,9 +95,10 @@ class AStarAgent():
         prev = dest
         targ = None
         while not prev == start:
+            route = [prev] + route
             targ = prev
             prev = parent[prev]
-
+        print(route)
         if (targ[0] - prev[0]) == 0:
             if (targ[1] - prev[1] == 1):
                 action = Action(car.id, 2)
@@ -182,13 +184,13 @@ def Astar(car, dest, grid):
             neighbor = add(curr, dir)
             if neighbor[0] < 0:
                 continue
-            if neighbor[0] >= len(grid):
+            if neighbor[0] >= len(grid) + 1: #TODO
                 continue
             if neighbor[1] < 0:
                 continue
-            if neighbor[1] >= len(grid[0]):
+            if neighbor[1] >= len(grid[0]) + 1: #TODO
                 continue
-            if grid[neighbor[0]][neighbor[1]] == False:
+            if grid[neighbor[1]][neighbor[0]] == False:
                 continue
 
             n_cost = cost[curr] + 1

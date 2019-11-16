@@ -68,7 +68,7 @@ def main():
         }
         replay = {
             "config": config,
-            "steps": [{"state": states[i], "acts": acts[i]} for i in range(len(states))]
+            "steps": [{"state": states[i], "acts": acts[i]} for i in range(min(len(states), len(acts)))]
         }
         # Save the replay
         d = "-".join((str(datetime.now()).split()))
@@ -128,7 +128,7 @@ def main():
     }
     replay = {
         "config": config,
-        "steps": [{"state": states[i], "acts": acts[i]} for i in range(len(states))]
+        "steps": [{"state": states[i], "acts": acts[i]} for i in range(min(len(states), len(acts)))]
     }
     # Save the replay
     d = "-".join((str(datetime.now()).split()))
