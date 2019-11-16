@@ -1,10 +1,10 @@
-class ChallengeScene extends Phaser.Scene {
+class LiveScene extends Phaser.Scene {
     constructor(config) {
         console.debug("constructor", config);
 
         // this is some information for phaser about our scene
         const sceneConfig = {
-            key: "challenge-scene",
+            key: "live-scene",
         };
 
         super(sceneConfig);

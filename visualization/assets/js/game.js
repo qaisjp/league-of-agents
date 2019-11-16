@@ -30,7 +30,7 @@ window.addEventListener("load", () => {
                 debug: true     // TODO
             }
         },
-        scene: [new ChallengeScene(visualsConfig)],
+        scene: [new LiveScene(visualsConfig)],
         parent: document.querySelector("#top"),
     };
 
