@@ -6,8 +6,8 @@ const visualsConfig = {
     serverAddr: "http://localhost:8080",
     updateInterval: 50, // ms
     resolution: {
-        x: 1280,
-        y: 1100,
+        x: 1080,
+        y: 1080,
     },
 };
 
@@ -31,7 +31,7 @@ window.addEventListener("load", () => {
             }
         },
         scene: [new LiveScene(visualsConfig)],
-        parent: document.querySelector("#top"),
+        parent: document.querySelector("#right"),
     };
 
     const game = new Phaser.Game(phaserConfig);

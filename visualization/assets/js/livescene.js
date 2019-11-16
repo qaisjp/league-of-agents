@@ -51,7 +51,7 @@ class LiveScene extends Phaser.Scene {
         console.debug("initial game state", data);
 
         if ("message" in data) {
-            alert(data.message);
+            document.querySelector("#status").textContent = data.message;
             return false;
         }
 
