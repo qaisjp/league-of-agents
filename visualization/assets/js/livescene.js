@@ -131,9 +131,10 @@ class LiveScene extends Phaser.Scene {
         }
 
         // hacky... don't try to draw the game if we don't have data yet
-        if (!this.data.city) {
+        if (!this.data.city || !this.data.city.grid) {
             return;
         }
+        // console.log("this.data", this.data)
 
         this.updateCityGrid();
     }

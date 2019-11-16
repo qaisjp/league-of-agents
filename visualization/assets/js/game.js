@@ -4,7 +4,7 @@ const visualsConfig = {
 // @serverAddr: Address of the server to connect to, eg. 'http://localhost:8000'
 //              If empty, uses the same server the visualization is hosted on.
     serverAddr: "http://localhost:8080",
-    updateInterval: 50, // ms
+    updateInterval: 500, // ms
     resolution: {
         x: 1080,
         y: 1080,
@@ -19,42 +19,100 @@ const CITY_TILE_INDEXES = {
     impassable: 1,
 };
 
-const viz = {}
+const viz = {
+    live: true,
+    scene: null,
+    data: null
+}
 
 const clearUI = () => {
-    document.querySelector("#status").textContent = "";
+    document.querySelector("#status").textContent = ""
+    clearStepUI()
+}
+
+const clearStepUI = () => {
+    document.querySelector("#teams").innerHTML = ""
 }
 
 const onSwitchLive = e => {
     clearUI();
-    if (e.target.checked) {
-        alert("going to live")
-        viz.scenes.remove("replay-scene")
-        viz.scenes.add("live-scene", new LiveScene(visualsConfig))
-        viz.scenes.run("live-scene")
-    } else {
-        alert("leaving live")
-        viz.scenes.remove("live-scene")
-        viz.scenes.add("replay-scene", new ReplayScene(visualsConfig))
-        viz.scenes.run("replay-scene")
+
+    viz.live = e.target.checked
+
+    const newScene = viz.live ? new LiveScene(visualsConfig) : new ReplayScene(visualsConfig, applyNextStep)
+    loadGame(newScene)
+}
+
+const applyStep = id => {
+    clearStepUI()
+
+    if (viz.live) {
+        alert("not applying step because live")
+        return
     }
+
+    if (!Number.isFinite(id)) {
+        alert("step ID must be a (finite) number")
+        return
+    }
+
+    if (viz.data == null) {
+        alert("replay data not loaded yet")
+        return
+    }
+
+    if (id >= viz.data.steps.length) {
+        alert("step " + id + " does not exist. must be <" + viz.data.steps.length)
+        return
+    }
+
+    const step = viz.data.steps[id]
+    step.id = id
+    const teamsEl = viz.el.teams
+    for (const team of step.state.teams) {
+        const opt = document.createElement("option");
+        opt.text = team.name;
+        teamsEl.add(opt)
+    }
+
+    viz.el.frameInput.value = id
+    viz.el.slider.value = id
+
+    viz.scene.step = step
+}
+
+const setPaused = state => {
+    if (state === null) {
+        state = viz.scene.viz.state === "playing"
+    }
+
+    viz.scene.viz.state = state ? "paused" : "playing"
+    viz.el.playpause.textContent = state ? "play" : "pause"
 }
 
 const apply = () => {
-    const code = document.querySelector("#codebox")
-    const obj = JSON.parse(code.value);
+    const obj = JSON.parse(viz.el.code.value);
+    viz.data = obj;
 
-    const maxVal = obj.steps.length
-    console.log(maxVal)
+    const maxVal = obj.steps.length - 1
 
-    const slider = document.querySelector("#frame-range")
-    slider.setAttribute("max", maxVal)
-    slider.value = "0"
+    viz.el.slider.setAttribute("max", maxVal)
+    viz.el.slider.value = "0"
 
-    const frameInput = document.querySelector("#frame-input")
-    frameInput.setAttribute("max", maxVal)
-    frameInput.value = "0"
+    viz.el.frameInput.setAttribute("max", maxVal)
+    viz.el.frameInput.value = "0"
 
+    setPaused(true)
+    applyStep(0)
+}
+
+const applyNextStep = () => {
+    console.log("applying next step");
+    let next = viz.scene.step.id + 1
+    if (next >= viz.data.steps.length) {
+        next = 0
+    }
+    applyStep(next)
 }
 
 const onChooseFileDrop = async event => {
@@ -74,8 +132,7 @@ const onChooseFileDrop = async event => {
         return
     }
 
-    const code = document.querySelector("#codebox")
-    code.value = await file.text();
+    viz.el.code.value = await file.text();
 
     apply()
 }
@@ -85,16 +142,73 @@ const eventStopAndPrevent = event => {
     event.preventDefault()
 }
 
+const onSliderChange = event => {
+    applyStep(Number.parseInt(event.target.value))
+}
+
+const onSliderInput = event => {
+    viz.el.frameInput.value = event.target.value
+}
+
+const togglePlayPause = () => {
+    setPaused(null)
+}
+
+const onUpdateInterval = e => {
+    if (e.target.textContent.length > 0) {
+        const direction = (e.target.textContent === "speed up") ? -1 : 1
+        visualsConfig.updateInterval += 50 * direction
+        if (visualsConfig.updateInterval <= 0) {
+            visualsConfig.updateInterval = 50
+        }
+        viz.el.gamespeed.value = visualsConfig.updateInterval
+    } else {
+        visualsConfig.updateInterval = e.target.value
+    }
+}
+
 window.addEventListener("load", () => {
-    document.querySelector("#live").addEventListener("change", onSwitchLive)
+    viz.el = {}
+    viz.el.teams = document.querySelector("#teams")
+    viz.el.frameInput = document.querySelector("#frame-input")
 
-    const code = document.querySelector("#codebox")
-    code.addEventListener("dragover", eventStopAndPrevent)
-    code.addEventListener("dragenter", eventStopAndPrevent)
-    code.addEventListener("drop", onChooseFileDrop)
+    viz.el.playpause = document.querySelector("#playpause")
+    viz.el.playpause.addEventListener("click", togglePlayPause)
 
-    const reload = document.querySelector("#btn-reload")
-    reload.addEventListener("click", apply)
+    viz.el.slider = document.querySelector("#frame-range")
+    viz.el.slider.addEventListener("input", onSliderInput)
+    viz.el.slider.addEventListener("change", onSliderChange)
+
+    viz.el.live = document.querySelector("#live")
+    viz.el.live.addEventListener("change", onSwitchLive)
+
+    viz.el.code = document.querySelector("#codebox")
+    viz.el.code.addEventListener("dragover", eventStopAndPrevent)
+    viz.el.code.addEventListener("dragenter", eventStopAndPrevent)
+    viz.el.code.addEventListener("drop", onChooseFileDrop)
+
+    viz.el.reload = document.querySelector("#btn-reload")
+    viz.el.reload.addEventListener("click", apply)
+
+    viz.el.gamespeed = document.querySelector("#gamespeed")
+    viz.el.gamespeed.value = visualsConfig.updateInterval
+    viz.el.gamespeed.addEventListener("change", onUpdateInterval)
+
+    viz.el.gamespeeddown = document.querySelector("#gamespeeddown")
+    viz.el.gamespeeddown.addEventListener("click", onUpdateInterval)
+    viz.el.gamespeedup = document.querySelector("#gamespeedup")
+    viz.el.gamespeedup.addEventListener("click", onUpdateInterval)
+
+    loadGame(new LiveScene(visualsConfig))
+})
+
+const loadGame = scene => {
+    if (viz.game != null) {
+        viz.game.destroy(true)
+        viz.game = null;
+        setTimeout(loadGame.bind(null, scene))
+        return
+    }
 
     const phaserConfig = {
         type: Phaser.AUTO,
@@ -106,10 +220,10 @@ window.addEventListener("load", () => {
                 debug: true     // TODO
             }
         },
-        scene: [new LiveScene(visualsConfig)],
+        scene: [scene],
         parent: document.querySelector("#right"),
     };
 
     viz.game = new Phaser.Game(phaserConfig);
-    viz.scenes = new Phaser.Scenes.SceneManager(viz.game);
-})
+    viz.scene = scene
+}
