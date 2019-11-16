@@ -1,5 +1,5 @@
-from .classes import State, Team, Car, Customer, Action, PriorityQueue
-
+from .classes import Action, PriorityQueue
+from scipy.optimize import linear_sum_assignment
 
 class AStarAgent():
     agent_type = "A_STAR"
@@ -16,16 +16,17 @@ class AStarAgent():
 
     def act(self, obs):
         # Obtain variables
-        map = obs.grid
-        teams = obs.teams
-        customers = obs.customers
+        self.grid = obs.grid
+        self.teams = obs.teams
+        self.customers = obs.customers
 
-        team = [t for t in teams if t.id == self.id][0]
+        team = [t for t in obs.teams if t.id == self.id][0]
         cars = team.cars
         # print(map)
         # print(teams)
         # print(customers)
         # print(team)
+        customers = obs.customers
         if (len(customers) == 0):
             print("No customer")
             actions = []
@@ -33,16 +34,19 @@ class AStarAgent():
                 actions.append(Action(c.id))
             return actions
         # Find closest pairs between cars and customers
-        assign = self.findPairs(cars, customers, map)
+        assign = self.findPairs(cars, customers, self.grid)
 
         actions = []
         for (car_index, dest) in assign:
             car = cars[car_index]
-            actions += [self.Astar(car, dest, map)]
+            actions += [self.Astar(car, dest, self.grid)]
+        for a in actions:
+            print(f"{a.car_id} -> {a.direction}")
         return actions
 
-    def Astar(self, car, dest, map):
+    def Astar(self, car, dest, grid):
         directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+        # directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
         start = car.position
 
         pq = PriorityQueue()
@@ -63,13 +67,13 @@ class AStarAgent():
                 neighbor = add(curr, dir)
                 if neighbor[0] < 0:
                     continue
-                if neighbor[0] >= len(map):
+                if neighbor[0] >= len(grid):
                     continue
                 if neighbor[1] < 0:
                     continue
-                if neighbor[1] >= len(map[0]):
+                if neighbor[1] >= len(grid[0]):
                     continue
-                if map[neighbor[0]][neighbor[1]] == 0:
+                if grid[neighbor[0]][neighbor[1]] == False:
                     continue
 
                 n_cost = cost[curr] + 1
@@ -95,86 +99,108 @@ class AStarAgent():
 
         if (targ[0] - prev[0]) == 0:
             if (targ[1] - prev[1] == 1):
-                action = Action(car.id, 1)
-                return action
-            else:
-                action = Action(car.id, 3)
-                return action
-        else:
-            if (targ[0] - prev[0] == 1):
                 action = Action(car.id, 2)
                 return action
             else:
                 action = Action(car.id, 0)
                 return action
+        else:
+            if (targ[0] - prev[0] == 1):
+                action = Action(car.id, 1)
+                return action
+            else:
+                action = Action(car.id, 3)
+                return action
+        raise Exception('You retards')
 
-        action = Action(car.id)
-        return action
+    def findPairs(self, cars, customers, grid):
 
-    def findPairs(self, cars, customers, map):
         # List of (car, destination) pairs
         assign = []
-        for car in cars:
-            assign += [(0, (0, 0))]
-        seeking_cars = 0
-
-        # List of (list of distances from car to customer) for each car
-        distances = []
-        for car in cars:
-            distc = []
-            for customer in customers:
-                distc += [float("Inf")]
-            distances += [distc]
-
         for (i, car) in enumerate(cars):
+            assign += [(i, ((int(len(grid)/2)), (int(len(grid)/2))))]
+        loaded_cars = []
+
+        # Matrix of distances between cars (rows) and customers (columns)
+        distances = []
+        for (i, car) in enumerate(cars):
+            dist_car = []
 
             # Car is carrying a customer
             if (car.available_capacity < car.capacity):
-                c = get_customer_from_id(car.customers[0], customers)
-                assign[i] = (i, c.destination)
+                dist_car = [len(grid)*10]*len(customers)
+                loaded_cars.append(i)
 
             # Car is searching for a customer
             else:
-                seeking_cars += 1
-                for (j, customer) in enumerate(customers):
-                    # distances[i][j] = self.Astar(car, customer.position, map)
-                    distances[i][j] = heuristic(car.position,
-                                                customer.position)
+                for customer in customers:
+                    # dist_car += [heuristic(cars[i].position, customer.position)]
+                    dist_car += [Astar(cars[i], customer.position, grid)]
+            distances += [dist_car]
+        for c in cars:
+            if len(c.customers) > 0:
+                print("Customers in car")
+        print(distances)
+        rows, columns = linear_sum_assignment(distances)
 
-        # Finds the (car, customer) pairs with the minimum
-        # distance and adds them to assigned destinations
-        # print(map)
-        while (seeking_cars > 0):
-            min_car, min_customer = min_pair(distances)
-            # print(assign)
-            # print(min_car)
-            # print(min_customer)
-            # print(customers)
-            assign[min_car] = (min_car, customers[min_customer].position)
-            for i in range(len(customers)):
-                distances[min_car][i] = float("Inf")
-            seeking_cars -= 1
-        # print(assign)
+        for i in range(len(rows)):
+            assign[rows[i]] = (rows[i], customers[columns[i]].position)
+
+        # Head towards the nearest customer destination
+        for i in loaded_cars:
+            closest_destination = len(grid)*10
+            for j in range(len(cars[i].customers)):
+                c = get_customer_from_id(cars[i].customers[j], customers)
+                dist_cust = heuristic(cars[i].position, c.destination)
+                if dist_cust < closest_destination:
+                    assign[i] = (i, c.destination)
+        print("ASSign")
+        print(assign)
+        print(list(map(lambda c: c.position, customers)))
         return assign
 
+def Astar(car, dest, grid):
+    directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+    # directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    start = car.position
 
-# Helpers for Agent class
-def min_pair(distances):
-    min_dist = float("Inf")
-    min_car = None
-    min_customer = 0
-    for (car, dists) in enumerate(distances):
-        for (customer, dist) in enumerate(dists):
-            # print("yo")
-            # print(distances)
-            # print(distances[car][customer])
-            if distances[car][customer] < min_dist:
-                min_car = car
-                min_customer = customer
-    if min_car is None:
-        raise Exception("Min car is none")
-    return min_car, min_customer
+    pq = PriorityQueue()
+    pq.push(start, 0)
 
+    parent = {}
+    cost = {}
+    parent[start] = None
+    cost[start] = 0
+
+    while not pq.is_empty():
+        curr = pq.pop()
+
+        if curr == dest:
+            break
+
+        for i, dir in enumerate(directions):
+            neighbor = add(curr, dir)
+            if neighbor[0] < 0:
+                continue
+            if neighbor[0] >= len(grid):
+                continue
+            if neighbor[1] < 0:
+                continue
+            if neighbor[1] >= len(grid[0]):
+                continue
+            if grid[neighbor[0]][neighbor[1]] == False:
+                continue
+
+            n_cost = cost[curr] + 1
+            if neighbor not in cost or n_cost < cost[neighbor]:
+                cost[neighbor] = n_cost
+                priority = n_cost + heuristic(neighbor, dest)
+                pq.push(neighbor, priority)
+                parent[neighbor] = curr
+
+    if dest not in parent:
+        return len(grid)*10
+    return cost[dest]
 
 def add(x, y):
     s1 = x[0] + y[0]

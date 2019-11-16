@@ -1,7 +1,9 @@
 import json
 import os
+import time
 import argparse
 from datetime import datetime
+import pickle
 import signal
 import random
 from copy import copy
@@ -36,7 +38,7 @@ def main():
     args = parser.parse_args()
     data = json.load(args.i)
     agents = []
-    available_teams = api.get_team_tokens()  # dummy for now
+    available_teams = api.get_team_tokens()
     if(len(available_teams) < len(data["agents"])):
         for _ in range(len(data["agents"]) - len(available_teams)):
             print("Creating team..")
@@ -90,6 +92,9 @@ def main():
         for a in agents:
             # print("Acting...")
             w = api.get_world(team_id_to_token(a.get_team_id(), og_teams))
+            with open('obs.pickle', 'wb') as handle:
+                pickle.dump(w, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
             actions = a.act(w)
             act.append({
                 "team": a.get_team_id(),
@@ -97,12 +102,12 @@ def main():
             })
             for action in actions:
                 # print(vars(action))
-                if action.direction and action.direction != -1:
+                if action.direction is not None:
                     print("Moving a car")
                     print(action.car_id, action.direction, team_id_to_token(a.get_team_id(), og_teams))
                     print(action.car_id)
                     print(action.direction)
-                    action.direction = random.randint(0,3)
+                    # action.direction = random.randint(0,3)
                     api.move_car(action.car_id, action.direction, team_id_to_token(a.get_team_id(), og_teams))
         acts.append(act)
         while True:
@@ -112,6 +117,9 @@ def main():
             if not w:
                 break
             if w.ticks is not current_tick:
+                if w.ticks > current_tick + 1:
+                    print(w.ticks, current_tick)
+                    print("Unsynced")
                 break
     print("Game is done")
     # Let's create the game config
