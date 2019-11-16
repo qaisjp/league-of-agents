@@ -1,6 +1,12 @@
 import heapq
+from typing import List
 
 class State():
+    grid: List[List[bool]]
+    teams: List[Team]
+    customers: List[Customer]
+    ticks: int
+
     def __init__(self, grid, teams, customers, ticks):
         self.grid = grid
         self.teams = teams
@@ -8,6 +14,11 @@ class State():
         self.ticks = ticks
 
 class Team():
+    id: str
+    name: str
+    cars: List[Car]
+    score: int
+
     def __init__(self, id, name, cars, score):
         self.id = id
         self.name = name
@@ -16,6 +27,12 @@ class Team():
 
 
 class Car():
+    id: str
+    # position: tuple
+    capacity: int
+    available_capacity: int
+    customers: List[str]
+
     def __init__(self, id, position, capacity, available_capacity, customers):
         self.id = id
         self.position = position
@@ -25,6 +42,10 @@ class Car():
 
 
 class Customer():
+    id: str
+    # position: tuple
+    # destination: tuple
+
     def __init__(self, id, position, destination):
         self.id = id
         self.position = position
