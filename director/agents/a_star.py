@@ -79,6 +79,10 @@ class AStarAgent():
                     pq.push(neighbor, priority)
                     parent[neighbor] = curr
 
+        if dest not in parent:
+            action = Action(car.id)
+            return action
+
         bt = dest
         targ = start
         while not bt == start:
