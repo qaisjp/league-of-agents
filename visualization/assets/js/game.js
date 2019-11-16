@@ -21,6 +21,8 @@ const CITY_TILE_INDEXES = {
 
 class ChallengeScene extends Phaser.Scene {
     constructor(config) {
+        console.debug("constructor", config);
+
         // this is some information for phaser about our scene
         const sceneConfig = {
             key: "challenge-scene",
@@ -45,6 +47,8 @@ class ChallengeScene extends Phaser.Scene {
     }
 
     preload() {
+        console.debug("preload");
+
         this.load.image('city-tiles', 'assets/elements.png');
         //this.load.image('car', 'assets/car_spr.png');
 
@@ -67,13 +71,22 @@ class ChallengeScene extends Phaser.Scene {
 
         console.debug("initial game state", data);
 
+        if ("message" in data) {
+            alert(data.message);
+            return false;
+        }
+
         this.cityConfig = {
             width: data.width,
             height: data.height,
         };
+
+        return true;
     }
 
     create() {
+        console.debug("create");
+
         this.map = this.make.tilemap({
             width: this.cityConfig.width,
             height: this.cityConfig.height,
@@ -147,6 +160,7 @@ class ChallengeScene extends Phaser.Scene {
     }
 
     updateCityGrid() {
+        console.log("updateCityGrid; this.data", this.data)
         var gridTiles = this.getCityGridTiles(this.data.city.grid);
         gridTiles = this.getCustomerGridTiles(this.data.city.customers, gridTiles)
         gridTiles = this.getCarGridTiles(this.data.city.cars, gridTiles)
@@ -207,17 +221,19 @@ class ChallengeScene extends Phaser.Scene {
     }
 }
 
-const phaserConfig = {
-    type: Phaser.AUTO,
-    width: visualsConfig.resolution.x,
-    height: visualsConfig.resolution.y,
-    physics: {
-        default: 'arcade',
-        arcade: {
-            debug: true     // TODO
-        }
-    },
-    scene: [new ChallengeScene(visualsConfig)],
-};
+window.addEventListener("load", () => {
+    const phaserConfig = {
+        type: Phaser.AUTO,
+        width: visualsConfig.resolution.x,
+        height: visualsConfig.resolution.y,
+        physics: {
+            default: 'arcade',
+            arcade: {
+                debug: true     // TODO
+            }
+        },
+        scene: [new ChallengeScene(visualsConfig)],
+    };
 
-const game = new Phaser.Game(phaserConfig);
+    const game = new Phaser.Game(phaserConfig);
+})
