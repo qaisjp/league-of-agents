@@ -114,11 +114,22 @@ const eventStopAndPrevent = event => {
     event.preventDefault()
 }
 
+const onSliderChange = event => {
+    applyStep(Number.parseInt(event.target.value))
+}
+
+const onSliderInput = event => {
+    viz.el.frameInput.value = event.target.value
+}
+
 window.addEventListener("load", () => {
     viz.el = {}
     viz.el.teams = document.querySelector("#teams")
-    viz.el.slider = document.querySelector("#frame-range")
     viz.el.frameInput = document.querySelector("#frame-input")
+
+    viz.el.slider = document.querySelector("#frame-range")
+    viz.el.slider.addEventListener("input", onSliderInput)
+    viz.el.slider.addEventListener("change", onSliderChange)
 
     document.querySelector("#live").addEventListener("change", onSwitchLive)
 
