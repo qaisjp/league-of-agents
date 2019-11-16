@@ -1,5 +1,5 @@
 import json
-import path
+import os
 import argparse
 from datetime import datetime
 
@@ -63,6 +63,7 @@ def main():
                     #api.move_car(a.get_team_id(), action.car, action.direction)
                     pass
         acts.append(act)
+        # TODO: wait for the tick to pass
 
     print("Game is done")
     # Let's create the game config
@@ -76,9 +77,9 @@ def main():
     # Save the replay
     d = "-".join((str(datetime.now()).split()))
     replay_name = f"{len(agents)}-agents-{d}"
-    with open(path.join("replays", replay_name), 'w') as outfile:
+    with open(os.path.join("replays", replay_name), 'w') as outfile:
         json.dump(replay, outfile)
     print(f"Wrote replay to replays/{replay_name}")
-    
+
 if __name__ == "__main__":
     main()
