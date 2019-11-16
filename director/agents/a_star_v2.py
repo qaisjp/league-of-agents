@@ -2,8 +2,8 @@ from classes import Action, PriorityQueue
 from scipy.optimize import linear_sum_assignment
 
 
-class AStarAgent():
-    agent_type = "A_STAR"
+class AStarAgentv2():
+    agent_type = "A_STARv2"
 
     def __init__(self, name, team_id):
         self.name = name
@@ -29,7 +29,7 @@ class AStarAgent():
         # print(team)
         customers = obs.customers
         if (len(customers) == 0):
-            # print("No customer")
+            print("No customer")
             actions = []
             for c in cars:
                 actions.append(Action(c.id))
@@ -41,6 +41,8 @@ class AStarAgent():
         for (car_index, dest) in assign:
             car = cars[car_index]
             actions += [self.Astar(car, dest, self.grid)]
+        for a in actions:
+            print(f"{a.car_id} -> {a.direction}")
         return actions
 
     def Astar(self, car, dest, grid):
@@ -118,44 +120,76 @@ class AStarAgent():
         # List of (car, destination) pairs
         assign = []
         for (i, car) in enumerate(cars):
-            assign += [(i, ((int(len(grid) / 2)), (int(len(grid) / 2))))]
-        loaded_cars = []
+            assign += [(i, (car.position[0], car.position[1]))]
+
+        costumer_d = [
+            Astar(c.position, c.destination, grid) for c in customers
+        ]
 
         # Matrix of distances between cars (rows) and customers (columns)
         distances = []
-        for (i, car) in enumerate(cars):
-            dist_car = []
 
-            # Car is carrying a customer
-            if (car.available_capacity < car.capacity):
-                dist_car = [len(grid) * 10] * len(customers)
-                loaded_cars.append(i)
+        for car in cars:
+            # Initialize all distances as infeasible
+            dist_car = [len(grid) * 10 for i in range(len(customers))]
 
-            # Car is searching for a customer
-            else:
-                for customer in customers:
-                    # dist_car += [heuristic(cars[i].position, customer.position)]
-                    dist_car += [Astar(cars[i], customer.position, grid)]
+            # If the car can carry more people, add heuristic distances from car to customers
+            if not car.available_capacity == 0:
+                # TODO: Potentially multiply heuristic by const
+                dist_car = [
+                    Astar(car.position, c.position, grid) / costumer_d[i]
+                    for i, c in enumerate(customers)
+                ]
+
+            for other_car in cars:
+                if car.id == other_car.id:
+                    # Add distances from car to customers destinations
+                    car_customers = [
+                        get_customer_from_id(id, customers)
+                        for id in other_car.customers
+                    ]
+                    dist_car += [
+                        Astar(car.position, c.destination, grid)
+                        for c in car_customers
+                    ]
+                else:
+                    # Add array of infeasible distances for customers of other cars
+                    dist_car += [
+                        len(grid) * 10 for i in range(len(other_car.customers))
+                    ]
+
             distances += [dist_car]
+
+        # Some debugging?
+        for c in cars:
+            if len(c.customers) > 0:
+                print("Customers in car")
+        print(distances)
+
         rows, columns = linear_sum_assignment(distances)
 
         for i in range(len(rows)):
-            assign[rows[i]] = (rows[i], customers[columns[i]].position)
+            j = columns[i]
+            if j < len(customers):
+                assign[rows[i]] = (rows[i], customers[j].position)
+            else:
+                c = 0
+                while not 0 == j:
+                    if j < len(cars[c].customers):
+                        assign[rows[i]] = (rows[i],
+                                           cars[c].customers[j].position)
+                        j = 0
+                    j -= len(cars[c].customers)
+                    c += 1
 
-        # Head towards the nearest customer destination
-        for i in loaded_cars:
-            closest_destination = len(grid) * 10
-            for j in range(len(cars[i].customers)):
-                c = get_customer_from_id(cars[i].customers[j], customers)
-                dist_cust = heuristic(cars[i].position, c.destination)
-                if dist_cust < closest_destination:
-                    assign[i] = (i, c.destination)
+        print("ASSign")
+        print(assign)
+        print(list(map(lambda c: c.position, customers)))
         return assign
 
 
-def Astar(car, dest, grid):
+def Astar(start, dest, grid):
     directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
-    start = car.position
 
     pq = PriorityQueue()
     pq.push(start, 0)
