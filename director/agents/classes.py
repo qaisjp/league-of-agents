@@ -8,7 +8,7 @@ class State():
 
 
 class Team():
-    def __init__(self, name, cars, score):
+    def __init__(self, id, name, cars, score):
         self.id = id
         self.name = name
         self.cars = cars
@@ -16,10 +16,11 @@ class Team():
 
 
 class Car():
-    def __init__(self, position, capacity, availableCapacity, customers):
+    def __init__(self, id, position, capacity, available_capacity, customers):
+        self.id = id
         self.position = position
         self.capacity = capacity
-        self.available_capacity = availableCapacity
+        self.available_capacity = available_capacity
         self.customers = customers
 
 
@@ -48,4 +49,3 @@ class PriorityQueue():
 
     def pop(self):
         return heapq.heappop(self.elems)[1]
-

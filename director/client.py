@@ -156,7 +156,7 @@ class API():
                     "id": idx,
                     "position": index_to_coordinates(width, c["position"]),
                     "capacity": c["capacity"],
-                    "availableCapacity": c["capacity"] - c["used_capacity"],
+                    "available_capacity": c["capacity"] - c["used_capacity"],
                     "customers": carcustomers[idx],
                 }
                 teamcars[str(c["team_id"])].append(our_c)
