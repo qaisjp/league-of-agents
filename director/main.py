@@ -3,8 +3,10 @@ import os
 import argparse
 from datetime import datetime
 import signal
+from copy import copy
 import sys
 from json import JSONEncoder
+import logging
 class MyEncoder(JSONEncoder):
     def default(self, o):
         return o.__dict__   
@@ -15,14 +17,17 @@ parser = argparse.ArgumentParser(description='League of Agents director')
 
 parser.add_argument('-i', metavar='in-file', type=argparse.FileType('rt'))
 
+# logging.basicConfig(level=logging.DEBUG)
 def create_agent(t, team_name, team_id):
     if(t == "A_STAR"):
         a = AStarAgent(team_name, team_id)
         return a
 
 def team_id_to_token(id, available_teams):
+    print(id, available_teams)
     for t in available_teams:
         if t["id"] == id:
+            print("Found token")
             return t["token"]
 
 def main():
@@ -43,6 +48,7 @@ def main():
             })  # add the team created by the api later
     print("Available teams:")
     print(available_teams)
+    og_teams = copy(available_teams)
     api.start_game()
     for a in data["agents"]:
         print(f"Creating {a['name']}")
@@ -93,7 +99,7 @@ def main():
                     print("Moving a car")
                     print(action.car_id)
                     print(action.direction)
-                    api.move_car(action.car_id, action.direction, team_id_to_token(a.get_team_id(), available_teams))
+                    api.move_car(action.car_id, action.direction, team_id_to_token(a.get_team_id(), og_teams))
         acts.append(act)
         while True:
             # print("Waiting for tick...")

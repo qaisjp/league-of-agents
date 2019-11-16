@@ -148,7 +148,7 @@ class AStarAgent():
             for i in range(len(customers)):
                 distances[min_car][i] = float("Inf")
             seeking_cars -= 1
-
+        # print(assign)
         return assign
 
 
