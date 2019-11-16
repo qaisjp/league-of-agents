@@ -282,3 +282,4 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/node,linux,macos,python,windows,jupyternotebooks
+director/replays/*.json
