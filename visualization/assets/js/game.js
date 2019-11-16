@@ -66,10 +66,6 @@ const onChooseFileDrop = async event => {
     const slider = document.querySelector(".slider")
     slider.setAttribute("max", maxVal)
     slider.setAttribute("min", minVal)
-});
-
-
-
 }
 
 const eventStopAndPrevent = event => {
