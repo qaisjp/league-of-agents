@@ -81,11 +81,14 @@ class API():
         log_response(r)
         return r
 
-    def get_world(self):
+    def get_world(self, token=None):
         """
         Queries the API for the world, and returns an observation
         """
-        r = requests.get(self.url.world)
+        if token:
+            r = requests.get(self.url.world, headers={'Authorization': token})
+        else:
+            r = requests.get(self.url.world)
         world = r.json()
 
         # If game has ended, world just contains an informative message which is
@@ -120,7 +123,6 @@ class API():
 
         carcustomers = their_customers_to_our_carcustomers(world["customers"])
         teamcars = their_cars_to_our_teamcars(world["cars"], carcustomers)
-
         grid = []
 
         k = -1

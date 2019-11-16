@@ -24,10 +24,8 @@ def create_agent(t, team_name, team_id):
         return a
 
 def team_id_to_token(id, available_teams):
-    print(id, available_teams)
     for t in available_teams:
         if t["id"] == id:
-            print("Found token")
             return t["token"]
 
 def main():
@@ -89,13 +87,14 @@ def main():
         act = []
         for a in agents:
             # print("Acting...")
-            actions = a.act(world)
+            w = api.get_world(team_id_to_token(a.get_team_id(), og_teams))
+            actions = a.act(w)
             act.append({
                 "team": a.get_team_id(),
                 "actions": actions
             })
             for action in actions:
-                print(vars(action))
+                # print(vars(action))
                 if action.direction and action.direction != -1:
                     print("Moving a car")
                     print(action.car_id, action.direction, team_id_to_token(a.get_team_id(), og_teams))

@@ -130,10 +130,8 @@ class AStarAgent():
 
             # Car is carrying a customer
             if (car.available_capacity < car.capacity):
-                print(vars(car))
-                print(assign)
-                print(car.customers)
-                assign[i] = (i, car.customers[0].destination)
+                c = get_customer_from_id(car.customers[0], customers)
+                assign[i] = (i, c.destination)
 
             # Car is searching for a customer
             else:
@@ -183,6 +181,11 @@ def add(x, y):
     s2 = x[1] + y[1]
     return (s1, s2)
 
+def get_customer_from_id(id, customers):
+    for c in customers:
+        if c.id == id:
+            return c
+    raise Exception(f"No customer with id {id}")
 
 def heuristic(pos1, pos2):
     (x1, y1) = pos1
