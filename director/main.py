@@ -37,6 +37,7 @@ def main():
                 "token": token,
                 "name": team_name
             })  # add the team created by the api later
+    print("Available teams:")
     print(available_teams)
     api.start_game()
     for a in data["agents"]:
@@ -73,7 +74,7 @@ def main():
         print("Done!")
         if not world:
             break
-        current_tick = world["ticks"]
+        current_tick = world.ticks
         states.append(world)
         act = []
         for a in agents:
@@ -93,7 +94,7 @@ def main():
             print(w, current_tick)
             if not w:
                 break
-            if w["ticks"] is not current_tick:
+            if w.ticks is not current_tick:
                 break
     print("Game is done")
     # Let's create the game config

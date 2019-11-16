@@ -16,12 +16,12 @@ class AStarAgent():
 
     def act(self, obs):
         # Obtain variables
-        map = obs["map"]
-        teams = obs["teams"]
-        customers = obs["customers"]
+        map = obs.grid
+        teams = obs.teams
+        customers = obs.customers
 
         team = [t for t in teams if t.id == self.id][0]
-        cars = team["cars"]
+        cars = team.cars
 
         # Find closest pairs between cars and customers
         assign = self.findPairs(cars, customers, map)
