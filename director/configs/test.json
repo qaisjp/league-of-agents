@@ -1,0 +1,12 @@
+{
+    "agents": [
+        {
+            "type": "A_STAR",
+            "name": "Yolo1"
+        },
+        {
+            "type": "A_STAR",
+            "name": "Yolo2"
+        }
+    ]
+}
