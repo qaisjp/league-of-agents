@@ -22,7 +22,12 @@ const CITY_TILE_INDEXES = {
 const viz = {}
 
 const clearUI = () => {
-    document.querySelector("#status").textContent = "";
+    document.querySelector("#status").textContent = ""
+    clearStepUI()
+}
+
+const clearStepUI = () => {
+    document.querySelector("#teams").innerHTML = ""
 }
 
 const onSwitchLive = e => {
@@ -40,21 +45,46 @@ const onSwitchLive = e => {
     }
 }
 
+const applyStep = id => {
+    clearStepUI()
+
+    if (!Number.isFinite(id)) {
+        alert("step ID must be a (finite) number")
+        return
+    }
+
+    if (viz.data == null) {
+        alert("replay data not loaded yet")
+        return
+    }
+
+    if (id >= viz.data.steps.length) {
+        alert("step " + id + " does not exist. must be <" + viz.data.steps.length)
+        return
+    }
+
+    const step = viz.data.steps[id]
+    const teamsEl = viz.el.teams
+    for (const team of step.state.teams) {
+        const opt = document.createElement("option");
+        opt.text = team.name;
+        teamsEl.add(opt)
+    }
+}
+
 const apply = () => {
-    const code = document.querySelector("#codebox")
-    const obj = JSON.parse(code.value);
+    const obj = JSON.parse(viz.el.code.value);
+    viz.data = obj;
 
     const maxVal = obj.steps.length
-    console.log(maxVal)
 
-    const slider = document.querySelector("#frame-range")
-    slider.setAttribute("max", maxVal)
-    slider.value = "0"
+    viz.el.slider.setAttribute("max", maxVal)
+    viz.el.slider.value = "0"
 
-    const frameInput = document.querySelector("#frame-input")
-    frameInput.setAttribute("max", maxVal)
-    frameInput.value = "0"
+    viz.el.frameInput.setAttribute("max", maxVal)
+    viz.el.frameInput.value = "0"
 
+    applyStep(0)
 }
 
 const onChooseFileDrop = async event => {
@@ -74,8 +104,7 @@ const onChooseFileDrop = async event => {
         return
     }
 
-    const code = document.querySelector("#codebox")
-    code.value = await file.text();
+    viz.el.code.value = await file.text();
 
     apply()
 }
@@ -86,15 +115,20 @@ const eventStopAndPrevent = event => {
 }
 
 window.addEventListener("load", () => {
+    viz.el = {}
+    viz.el.teams = document.querySelector("#teams")
+    viz.el.slider = document.querySelector("#frame-range")
+    viz.el.frameInput = document.querySelector("#frame-input")
+
     document.querySelector("#live").addEventListener("change", onSwitchLive)
 
-    const code = document.querySelector("#codebox")
-    code.addEventListener("dragover", eventStopAndPrevent)
-    code.addEventListener("dragenter", eventStopAndPrevent)
-    code.addEventListener("drop", onChooseFileDrop)
+    viz.el.code = document.querySelector("#codebox")
+    viz.el.code.addEventListener("dragover", eventStopAndPrevent)
+    viz.el.code.addEventListener("dragenter", eventStopAndPrevent)
+    viz.el.code.addEventListener("drop", onChooseFileDrop)
 
-    const reload = document.querySelector("#btn-reload")
-    reload.addEventListener("click", apply)
+    viz.el.reload = document.querySelector("#btn-reload")
+    viz.el.reload.addEventListener("click", apply)
 
     const phaserConfig = {
         type: Phaser.AUTO,
