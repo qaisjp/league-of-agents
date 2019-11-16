@@ -119,8 +119,20 @@ class API():
         carcustomers = their_customers_to_our_carcustomers(world["customers"])
         teamcars = their_cars_to_our_teamcars(world["cars"], carcustomers)
 
+        grid = []
+
+        k = -1
+        for i, b in enumerate(world["grid"]):
+            if i % width == 0:
+                grid.append([])
+                k += 1
+                print("append")
+                # curr = grid[:-1]
+            # print(b)
+            grid[k].append(b)
+
         observation = State(
-            [],
+            grid,
             list(map(their_team_to_ours, world["teams"].items())),
             list(map(their_customer_to_ours, world["customers"].items())),
             world["ticks"]
