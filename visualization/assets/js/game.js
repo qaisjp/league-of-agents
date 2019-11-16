@@ -19,7 +19,17 @@ const CITY_TILE_INDEXES = {
     impassable: 1,
 };
 
+const onSwitchLive = e => {
+    if (e.target.checked) {
+        alert("going to live")
+    } else {
+        alert("leaving live")
+    }
+}
+
 window.addEventListener("load", () => {
+    document.querySelector("#live").addEventListener("change", onSwitchLive)
+
     const phaserConfig = {
         type: Phaser.AUTO,
         width: visualsConfig.resolution.x,
