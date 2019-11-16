@@ -12,6 +12,7 @@ import requests
 import lxml.html as lh
 
 from collections import defaultdict
+from agents.classes import State, Team, Car, Customer
 
 LOG_LEVEL = logging.INFO
 
@@ -88,12 +89,7 @@ class GameRunningError(Exception):
 
 def their_team_to_ours(tupl):
     idx, t = tupl
-    return {
-        "id": idx,
-        "name": t["name"],
-        "cars": [],
-        "score": t["score"],
-    }
+    return Team(idx, t["name"], [], t["score"])
 
 def their_customers_to_our_carcustomers(customers):
     carcustomers = defaultdict(list)
@@ -143,40 +139,40 @@ class API():
 
         def their_customer_to_ours(tupl):
             idx, c = tupl
-            return {
-                "id": idx,
-                "position": index_to_coordinates(width, c["origin"]),
-                "destination": index_to_coordinates(width, c["destination"]),
-            }
+            return Customer(
+                idx,
+                index_to_coordinates(width, c["origin"]),
+                index_to_coordinates(width, c["destination"])
+            )
 
         def their_cars_to_our_teamcars(cars, carcustomers):
             teamcars = defaultdict(list)
             for idx, c in cars.items():
-                our_c = {
-                    "id": idx,
-                    "position": index_to_coordinates(width, c["position"]),
-                    "capacity": c["capacity"],
-                    "available_capacity": c["capacity"] - c["used_capacity"],
-                    "customers": carcustomers[idx],
-                }
+                our_c = Car(
+                    idx,
+                    index_to_coordinates(width, c["position"]),
+                    c["capacity"],
+                    c["capacity"] - c["used_capacity"],
+                    carcustomers[idx],
+                )
                 teamcars[str(c["team_id"])].append(our_c)
             return teamcars
 
         carcustomers = their_customers_to_our_carcustomers(world["customers"])
         teamcars = their_cars_to_our_teamcars(world["cars"], carcustomers)
 
-        observation = {
-            "map": [],
-            "teams": list(map(their_team_to_ours, world["teams"].items())),
-            "customers": list(map(their_customer_to_ours, world["customers"].items())),
-            "ticks": world["ticks"]
-        }
+        observation = State(
+            [],
+            list(map(their_team_to_ours, world["teams"].items())),
+            list(map(their_customer_to_ours, world["customers"].items())),
+            world["ticks"]
+        )
 
         # Fill team.cars
-        for team in observation["teams"]:
-            team_id = team["id"]
+        for team in observation.teams:
+            team_id = team.id
             # print("teamcars", teamcars)
-            team["cars"] = teamcars[team_id]
+            team.cars = teamcars[team_id]
 
         logging.debug('Our world data: %s', observation)
         return observation
@@ -398,10 +394,10 @@ def main():
 
     api = API()
     try:
-        token = api.create_team()
+        token, _, _ = api.create_team()
     except GameRunningError:
         api.stop_game()
-        token = api.create_team()
+        token, _, _ = api.create_team()
 
     print(api.get_team_tokens())
 
@@ -423,7 +419,7 @@ def main():
         time.sleep(1)
         print("SLEEP")
         oworld = api.get_world()
-        print(oworld)
+        print(vars(oworld))
 
 if __name__ == '__main__':
     main()
