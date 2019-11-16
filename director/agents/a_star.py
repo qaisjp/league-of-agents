@@ -43,7 +43,6 @@ class AStarAgent():
 
     def Astar(self, car, dest, map):
         directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-        final_dir = -1
         start = car.position
 
         pq = PriorityQueue()
@@ -79,10 +78,29 @@ class AStarAgent():
                     priority = n_cost + heuristic(neighbor, dest)
                     pq.push(neighbor, priority)
                     parent[neighbor] = curr
-                    if curr == start:
-                        final_dir = i
 
-        action = Action(car.id, final_dir)
+        bt = dest
+        targ = start
+        while not bt == start:
+            targ = bt
+            bt = parent[bt]
+
+        if (targ[0] - bt[0]) == 0:
+            if (targ[1] - bt[1] == 1):
+                action = Action(car.id, 0)
+                return action
+            else:
+                action = Action(car.id, 2)
+                return action
+        else:
+            if (targ[0] - bt[0] == 1):
+                action = Action(car.id, 1)
+                return action
+            else:
+                action = Action(car.id, 3)
+                return action
+
+        action = Action(car.id)
         return action
 
     def findPairs(self, cars, customers, map):
