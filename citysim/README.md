@@ -22,6 +22,12 @@ the original `server2` files, and not any files from this repository.
 You (or someone) will need to add some extra stuff to the `Dockerfile` / instructions
 to add support for custom server data.
 
+Or run it with this, to make `big_maps` be loaded instead:
+
+```bash
+$ docker run --rm -p 8080:8080 -v "$(pwd)/big_maps:/opt/citymaps" --name citysim citysim:latest -map-dir /opt/citymaps
+```
+
 # Updating the binary and other files
 
 The `city` folder is created by the following sequence of commands:
