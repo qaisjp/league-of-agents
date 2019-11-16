@@ -14,8 +14,9 @@ from dashing import HSplit, VSplit, HBrailleChart, Log, Text
 class MyEncoder(JSONEncoder):
     def default(self, o):
         return o.__dict__   
-from client import API
+from agents.client import API
 from agents.a_star import AStarAgent
+from agents.rl import RLAgent
 from agents.classes import State
 
 parser = argparse.ArgumentParser(description='League of Agents director')
@@ -23,10 +24,12 @@ parser = argparse.ArgumentParser(description='League of Agents director')
 parser.add_argument('-i', metavar='in-file', type=argparse.FileType('rt'))
 
 # logging.basicConfig(level=logging.DEBUG)
-def create_agent(t, team_name, team_id):
+def create_agent(t, team_name, team_id, json):
     if(t == "A_STAR"):
         a = AStarAgent(team_name, team_id)
-        return a
+    if(t == "RL"):
+        a = RLAgent(team_name, team_id, json["path"])
+    return a
 
 def team_id_to_token(id, available_teams):
     for t in available_teams:
@@ -52,7 +55,6 @@ def create_logger(logs, ui):
     return log
 def create_charter(chart, ui):
     def c(value):
-        print(f"Charting {value}...")
         chart.append(max(min((float(value) / 100) + 50, 100), 0))
         ui.display()
     return c
@@ -70,12 +72,15 @@ def merge_ws(ws):
     _, firs_w = ws[0]
     grid = firs_w.grid
     ticks = firs_w.ticks
-    customers = firs_w.customers
+    customers = []
     teams = []
     for a, w in ws:
         for t in w.teams:
             if t.id == a.get_team_id():
                 teams.append(t)
+                for c in w.customers:
+                    if c.id not in map(lambda c: c.id, customers):
+                        customers.append(c)
     return State(grid, teams, customers, ticks)
 
 def main():
@@ -112,7 +117,7 @@ def main():
     for a in data["agents"]:
         log(f"Creating {a['name']}")
         team = available_teams.pop()
-        agent = create_agent(a["type"], a["name"], team["id"])
+        agent = create_agent(a["type"], a["name"], team["id"], a)
         agents.append(agent)
     states = []
     acts = []
@@ -156,7 +161,6 @@ def main():
                 "actions": actions
             })
             for action in actions:
-                # print(vars(action))
                 if action.direction is not None:
                     # log("Moving a car")
                     # log(f"{action.car_id} -> {action.direction}. Token: {team_id_to_token(a.get_team_id(), og_teams)}")
@@ -184,8 +188,8 @@ def main():
     log("Game is done")
     # Let's create the game config
     config = {
-        "agents": [{"type": a.agent_type, "name": a.get_name(), "team_id": a.get_team_id()} for a in agents]
-    }
+            "agents": [{"type": a.agent_type, "name": a.get_name(), "team_id": a.get_team_id()} for a in agents]
+        }
     replay = {
         "config": config,
         "steps": [{"state": states[i], "acts": acts[i]} for i in range(min(len(states), len(acts)))]
@@ -195,8 +199,8 @@ def main():
     d = "_".join((str(datetime.now()).split(":")))
     replay_name = f"{len(agents)}-agents-{d}.json"
     with open(os.path.join("replays", replay_name), 'w') as outfile:
-        json.dump(replay, outfile)
-    log(f"Wrote replay to replays/{replay_name}")
+        json.dump(replay, outfile, cls=MyEncoder)
+    print(f"Wrote replay to replays/{replay_name}")
 
 if __name__ == "__main__":
     main()

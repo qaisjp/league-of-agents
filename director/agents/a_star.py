@@ -1,4 +1,4 @@
-from classes import Action, PriorityQueue
+from .classes import Action, PriorityQueue
 from scipy.optimize import linear_sum_assignment
 
 class AStarAgent():

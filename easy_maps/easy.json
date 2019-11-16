@@ -2,9 +2,9 @@
     "name":"easy",
     "width":10,
     "height":10,
-    "car_per_team": 1,
-    "car_capacity": 5,
-    "wanted_active_customer": 1,
+    "car_per_team": 2,
+    "car_capacity": 2,
+    "wanted_active_customer": 5,
     "maximum_tmp_blockers": 0,
     "maximum_tick_tmp_blocker":5,
     "grid":[

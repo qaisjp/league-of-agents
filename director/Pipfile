@@ -11,6 +11,10 @@ requests = "*"
 lxml = "*"
 scipy = "*"
 blessed = "*"
+matplotlib = "*"
+numpy = "*"
+torch = "*"
+tqdm = "*"
 
 [requires]
 python_version = "3.7"

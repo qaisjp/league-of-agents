@@ -1,0 +1,13 @@
+{
+    "agents": [
+        {
+            "type": "RL",
+            "name": "Bezos",
+            "path": "supervised.th"
+        },
+        {
+            "type": "A_STAR",
+            "name": "Bezos2"
+        }
+    ]
+}

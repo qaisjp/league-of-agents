@@ -3,6 +3,10 @@
         {
             "type": "A_STAR",
             "name": "Bezos"
+        },
+        {
+            "type": "A_STAR",
+            "name": "Bezos2"
         }
     ]
 }
