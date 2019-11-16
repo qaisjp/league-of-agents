@@ -9,11 +9,14 @@ from copy import copy
 import sys
 from json import JSONEncoder
 import logging
+from dashing import HSplit, VSplit, HBrailleChart, Log, Text
+
 class MyEncoder(JSONEncoder):
     def default(self, o):
         return o.__dict__   
 from client import API
 from agents.a_star import AStarAgent
+from agents.classes import State
 
 parser = argparse.ArgumentParser(description='League of Agents director')
 
@@ -30,6 +33,51 @@ def team_id_to_token(id, available_teams):
         if t["id"] == id:
             return t["token"]
 
+def create_ui(number_agents):
+    ui =  VSplit(
+                Text('Hello World,\nthis is dashing.', border_color=2),
+                Log(title='logs', border_color=5),
+                *([HBrailleChart(border_color=2, color=2) for _ in range(number_agents)]),
+                title='League of Agents',
+            )
+    text = ui.items[0]
+    log = ui.items[1]
+    bcharts = list(ui.items[2:])
+    return ui, text, log, bcharts
+
+def create_logger(logs, ui):
+    def log(text):
+        logs.append(text)
+        ui.display()
+    return log
+def create_charter(chart, ui):
+    def c(value):
+        print(f"Charting {value}...")
+        chart.append(max(min((float(value) / 100) + 50, 100), 0))
+        ui.display()
+    return c
+def create_displayer(text, ui):
+    def d(t):
+        text.text = t
+        ui.display()
+    return d
+def find_agent_from_team_id(team_id, agents):
+    for a in agents:
+        if a.get_team_id() == team_id:
+            return a
+    raise Exception("No agent with that team id")
+def merge_ws(ws):
+    _, firs_w = ws[0]
+    grid = firs_w.grid
+    ticks = firs_w.ticks
+    customers = firs_w.customers
+    teams = []
+    for a, w in ws:
+        for t in w.teams:
+            if t.id == a.get_team_id():
+                teams.append(t)
+    return State(grid, teams, customers, ticks)
+
 def main():
     api = API()
     # api = API(base_url="https://citysimlocal.eu.ngrok.io/")
@@ -38,30 +86,40 @@ def main():
     data = json.load(args.i)
     agents = []
     available_teams = api.get_team_tokens()
+    ui, text, logs, bcharts = create_ui(len(data["agents"]))
+    log = create_logger(logs, ui)
+    display = create_displayer(text, ui)
+    charters = {}
+    for i in range(len(data["agents"])):
+        chart = create_charter(bcharts[i], ui)
+        charters[i] = chart
+    log("Starting...")
+    ui.display()
     if(len(available_teams) < len(data["agents"])):
         for _ in range(len(data["agents"]) - len(available_teams)):
-            print("Creating team..")
+            log("Creating team..")
             token, team_name, id = api.create_team()
+            log(f"Created team {team_name}")
             available_teams.append({
                 "id": id,
                 "token": token,
                 "name": team_name
             })  # add the team created by the api later
-    print("Available teams:")
-    print(available_teams)
+    log("Available teams:")
+    log(str(available_teams))
     og_teams = copy(available_teams)
     api.start_game()
     for a in data["agents"]:
-        print(f"Creating {a['name']}")
+        log(f"Creating {a['name']}")
         team = available_teams.pop()
         agent = create_agent(a["type"], a["name"], team["id"])
         agents.append(agent)
     states = []
     acts = []
-    print("Setting up the signal handler...")
+    log("Setting up the signal handler...")
     def signal_handler(sig, frame):
-        print('You pressed Ctrl+C!')
-        print('Exiting...')
+        log('You pressed Ctrl+C!')
+        log('Exiting...')
         config = {
             "agents": [{"type": a.agent_type, "name": a.get_name(), "team_id": a.get_team_id()} for a in agents]
         }
@@ -78,20 +136,20 @@ def main():
         print(f"Wrote replay to replays/{replay_name}")
         sys.exit(0)
     signal.signal(signal.SIGINT, signal_handler)
-    print("Starting the game...")
+    log("Starting the game...")
     while True:
         # print("Getting the world...")
         world = api.get_world()
         # print("Done!")
         if not world:
             break
-        current_tick = world.ticks
-        states.append(world)
+        #TODO: remove this API call
         act = []
+        ws = []
         for a in agents:
             # print("Acting...")
             w = api.get_world(team_id_to_token(a.get_team_id(), og_teams))
-
+            ws.append((a,w))
             actions = a.act(w)
             act.append({
                 "team": a.get_team_id(),
@@ -100,13 +158,19 @@ def main():
             for action in actions:
                 # print(vars(action))
                 if action.direction is not None:
-                    print("Moving a car")
-                    print(action.car_id, action.direction, team_id_to_token(a.get_team_id(), og_teams))
-                    print(action.car_id)
-                    print(action.direction)
-                    # action.direction = random.randint(0,3)
+                    # log("Moving a car")
+                    # log(f"{action.car_id} -> {action.direction}. Token: {team_id_to_token(a.get_team_id(), og_teams)}")
                     api.move_car(action.car_id, action.direction, team_id_to_token(a.get_team_id(), og_teams))
+        
+        current_tick = w.ticks
+        states.append(merge_ws(ws))
         acts.append(act)
+        text = "Teams:\n"
+        for i, t in enumerate(world.teams):
+            a = find_agent_from_team_id(t.id, agents)
+            text += f"<{a.agent_type}>: {a.name} ({t.name}): {t.score}\n"
+            charters[i](t.score)
+        display(text)
         while True:
             # print("Waiting for tick...")
             w = api.get_world()
@@ -115,10 +179,9 @@ def main():
                 break
             if w.ticks is not current_tick:
                 if w.ticks > current_tick + 1:
-                    print(w.ticks, current_tick)
-                    print("Unsynced")
+                    log("Unsynced")
                 break
-    print("Game is done")
+    log("Game is done")
     # Let's create the game config
     config = {
         "agents": [{"type": a.agent_type, "name": a.get_name(), "team_id": a.get_team_id()} for a in agents]
@@ -133,7 +196,7 @@ def main():
     replay_name = f"{len(agents)}-agents-{d}.json"
     with open(os.path.join("replays", replay_name), 'w') as outfile:
         json.dump(replay, outfile)
-    print(f"Wrote replay to replays/{replay_name}")
+    log(f"Wrote replay to replays/{replay_name}")
 
 if __name__ == "__main__":
     main()

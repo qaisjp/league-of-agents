@@ -6,41 +6,49 @@
     <meta content="utf-8" http-equiv="encoding">
     <script src="assets/js/phaser.min.js"></script>
     <script src="assets/js/game.js"></script>
+    <script src="assets/js/replayscene.js"></script>
+    <script src="assets/js/livescene.js"></script>
 </head>
 <body>
-    <div id="top">
-        <div>
-            <div id="controls">
-                <label>Frame <input type="number" style="width: 50px"></label>
-                <button>play</button>
-                <button>pause</button>
-                <input type="range" name="frame-range" min="0" max="200">
-                <button>slow down</button>
-                <input type="number" style="width: 50px" min="50" step="50">
-                <button>speed up</button>
-            </div>
-            <strong>Teams</strong>
-            <select multiple>
-                <option>some team 1</option>
-                <option>some team 2</option>
-                <option>some team 3</option>
-            </select>
-            <strong>Replay JSON</strong>
-            <textarea style="flex-grow: 1;"></textarea>
-            <button style="height: 100px; font-size: 3em; margin-top: 0.25em">Apply</button>
+    <div id="left">
+        <div id="controls">
+            <label>Frame <input id="frame-input" type="number" min="0" max="0" readonly></label>
+            <button>play</button>
+            <button>pause</button>
+            <input type="range" id="frame-range" min="0" max="0">
+            <button>slow down</button>
+            <input type="number" style="width: 50px" min="50" step="50">
+            <button>speed up</button>
         </div>
+        <strong>Teams</strong>
+        <select id="teams" multiple>
+            <option>some team 1</option>
+            <option>some team 2</option>
+            <option>some team 3</option>
+        </select>
+        <div style="margin-top: 1em; margin-bottom: 0.5em; display: flex; justify-content: space-between; align-items: center;">
+            <strong>Replay JSON</strong>
+            <div>
+                <button id="btn-reload">Reload</button>
+                <label><input type="checkbox" checked id="live"> Live Mode</label>
+            </div>
+        </div>
+        <textarea style="flex-grow: 1;" id="codebox"></textarea>
+    </div>
+    <div id="right">
+        <div style="margin-bottom: 0.5em;">Status: <span id="status"></span></div>
     </div>
 </body>
 <style>
     body {
         margin: 1em;
-    }
+        background-color: lightgray;
+        font-family: sans-serif;
 
-    #top {
         display: flex;
     }
 
-    #top > div {
+    #left {
         flex-grow: 1;
         display: flex;
         flex-direction: column;
@@ -48,7 +56,7 @@
         padding-right: 1em;
     }
 
-    #top > canvas {
+    #right canvas {
         width: auto;
         max-height: 95vh;
     }
@@ -56,7 +64,12 @@
     #controls {
         display: flex;
     }
-    #controls > input[name="frame-range"] {
+
+    #controls #frame-input {
+        width: 50px;
+    }
+
+    #controls #frame-range {
         flex-grow: 1;
     }
 </style>

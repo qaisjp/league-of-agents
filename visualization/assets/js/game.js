@@ -6,8 +6,8 @@ const visualsConfig = {
     serverAddr: "http://localhost:8080",
     updateInterval: 50, // ms
     resolution: {
-        x: 1280,
-        y: 1100,
+        x: 1080,
+        y: 1080,
     },
 };
 
@@ -19,209 +19,128 @@ const CITY_TILE_INDEXES = {
     impassable: 1,
 };
 
-class ChallengeScene extends Phaser.Scene {
-    constructor(config) {
-        console.debug("constructor", config);
+const viz = {}
 
-        // this is some information for phaser about our scene
-        const sceneConfig = {
-            key: "challenge-scene",
-        };
+const clearUI = () => {
+    document.querySelector("#status").textContent = ""
+    clearStepUI()
+}
 
-        super(sceneConfig);
+const clearStepUI = () => {
+    document.querySelector("#teams").innerHTML = ""
+}
 
-        this.config = config;
-
-        this.cityConfig = {
-            width: null,
-            height: null,
-        };
-
-        this.data = {
-            lastUpdate: 0,
-            updating: false,
-            city: null, // this will hold the latest data retrieved from server
-        };
-
-        this.map = null;
-    }
-
-    preload() {
-        console.debug("preload");
-
-        this.load.image('city-tiles', 'assets/elements.png');
-        //this.load.image('car', 'assets/car_spr.png');
-
-        // We need to retrieve the world once from the server to know the city
-        // size before we can continue. I'll do it synchronously because that's
-        // the easiest. It stalls rendering, which isn't cool, but this is only
-        // going to happen during the loading phase so probably nobody notices.
-        this.retrieveCityConfig();
-    }
-
-    async retrieveCityConfig() {
-        // This synchronously retrieves the game state once. Don't call after
-        // the loading phase as this stalls rendering.
-
-        const worldApi = `${this.config.serverAddr}/api/v1/world`;
-
-        const resp = await fetch(worldApi);
-
-        const data = await resp.json();
-
-        console.debug("initial game state", data);
-
-        if ("message" in data) {
-            alert(data.message);
-            return false;
-        }
-
-        this.cityConfig = {
-            width: data.width,
-            height: data.height,
-        };
-
-        return true;
-    }
-
-    create() {
-        console.debug("create");
-
-        this.map = this.make.tilemap({
-            width: this.cityConfig.width,
-            height: this.cityConfig.height,
-            tileWidth: TILE_WIDTH,
-            tileHeight: TILE_WIDTH,
-        });
-
-        const tiles = this.map.addTilesetImage("city-tiles");
-
-        const cityLayer = this.map.createBlankDynamicLayer("city-layer", tiles);
-
-        // fit to screen and center
-
-        const cityWidth = this.config.resolution.y;
-
-        cityLayer.setDisplaySize(cityWidth, cityWidth);
-
-        this.cameras.main.setScroll(
-            -(this.config.resolution.x / 2) + (cityWidth / 2),
-            0);
-    }
-
-    getCityGridTiles(grid) {
-        function getCityGridTile(node) {
-            if (node) {
-                return CITY_TILE_INDEXES["passable"];
-            }
-            return CITY_TILE_INDEXES["impassable"];
-        }
-
-        return grid.map(getCityGridTile);
-    }
-
-    getCustomerGridTiles(customers, grid) {
-        function getCustomerPosition(customer) {
-            if (customer.status == "waiting") {
-                return customer.origin;
-            } else if (customer.status == "delivered")  {
-                return customer.destination;
-            } else {
-                return;
-            }
-        }
-        for (var key in customers) {
-            if (getCustomerPosition(customers[key])) {
-                grid[getCustomerPosition(customers[key])] = 2;
-            }
-        }
-        return grid;
-    }
-
-    getCarGridTiles(cars, grid) {
-        for (var key in cars) {
-            grid[cars[key].position] = 3 + cars[key].team_id;
-        }
-        return grid;
-    }
-
-    update(time, delta) {
-        if (this.shouldUpdateData(time)) {
-            this.data.lastUpdate = time;
-            this.updateData();
-        }
-
-        // hacky... don't try to draw the game if we don't have data yet
-        if (!this.data.city) {
-            return;
-        }
-
-        this.updateCityGrid();
-    }
-
-    updateCityGrid() {
-        console.log("updateCityGrid; this.data", this.data)
-        var gridTiles = this.getCityGridTiles(this.data.city.grid);
-        gridTiles = this.getCustomerGridTiles(this.data.city.customers, gridTiles)
-        gridTiles = this.getCarGridTiles(this.data.city.cars, gridTiles)
-
-        // phaser wants to read the tile grid as an array-of-arrays...
-        const tiles = this.gridToArrays(gridTiles, this.cityConfig.width);
-
-        this.map.putTilesAt(tiles, 0, 0, false, "city-layer");
-    }
-
-    gridToArrays(grid, width) {
-        let arrays = [];
-        let acc = [];
-        for (let i = 0; i < grid.length; ++i) {
-            acc.push(grid[i]);
-            if (acc.length === width) {
-                arrays.unshift(acc);
-                acc = [];
-            }
-        }
-        return arrays;
-    }
-
-    shouldUpdateData(currentTime) {
-        if (this.data.updating) {
-            // a previous fetch is already pending!
-            return false;
-        }
-
-        // no more often than once per updateInterval
-        if (currentTime < this.data.lastUpdate + this.config.updateInterval) {
-            return false;
-        }
-
-        return true;
-    }
-
-    updateData() {
-        this.data.updating = true;
-
-        const worldApi = `${this.config.serverAddr}/api/v1/world`;
-
-        fetch(worldApi).then(this.dataUpdateHandleResponse.bind(this));
-    }
-
-    // callback
-    dataUpdateHandleResponse(response) {
-        // Reading a HTTP fetch response body is also an asynchronous operation.
-        // Therefore a second callback is set up.
-        response.json().then(this.dataUpdateReadData.bind(this));
-    }
-
-    // callback
-    dataUpdateReadData(data) {
-        // at this point we have the data finally available
-        this.data.city = data;
-        this.data.updating = false;
+const onSwitchLive = e => {
+    clearUI();
+    if (e.target.checked) {
+        alert("going to live")
+        viz.scenes.remove("replay-scene")
+        viz.scenes.add("live-scene", new LiveScene(visualsConfig))
+        viz.scenes.run("live-scene")
+    } else {
+        alert("leaving live")
+        viz.scenes.remove("live-scene")
+        viz.scenes.add("replay-scene", new ReplayScene(visualsConfig))
+        viz.scenes.run("replay-scene")
     }
 }
 
+const applyStep = id => {
+    clearStepUI()
+
+    if (!Number.isFinite(id)) {
+        alert("step ID must be a (finite) number")
+        return
+    }
+
+    if (viz.data == null) {
+        alert("replay data not loaded yet")
+        return
+    }
+
+    if (id >= viz.data.steps.length) {
+        alert("step " + id + " does not exist. must be <" + viz.data.steps.length)
+        return
+    }
+
+    const step = viz.data.steps[id]
+    const teamsEl = viz.el.teams
+    for (const team of step.state.teams) {
+        const opt = document.createElement("option");
+        opt.text = team.name;
+        teamsEl.add(opt)
+    }
+}
+
+const apply = () => {
+    const obj = JSON.parse(viz.el.code.value);
+    viz.data = obj;
+
+    const maxVal = obj.steps.length
+
+    viz.el.slider.setAttribute("max", maxVal)
+    viz.el.slider.value = "0"
+
+    viz.el.frameInput.setAttribute("max", maxVal)
+    viz.el.frameInput.value = "0"
+
+    applyStep(0)
+}
+
+const onChooseFileDrop = async event => {
+    event.stopPropagation()
+    event.preventDefault()
+
+    let files = event.dataTransfer.files;
+
+    if (files.length !== 1) {
+        alert("Expected exactly 1 file")
+        return
+    }
+
+    const file = files[0]
+    if (file.type !== "application/json") {
+        alert("File must be application/json")
+        return
+    }
+
+    viz.el.code.value = await file.text();
+
+    apply()
+}
+
+const eventStopAndPrevent = event => {
+    event.stopPropagation()
+    event.preventDefault()
+}
+
+const onSliderChange = event => {
+    applyStep(Number.parseInt(event.target.value))
+}
+
+const onSliderInput = event => {
+    viz.el.frameInput.value = event.target.value
+}
+
 window.addEventListener("load", () => {
+    viz.el = {}
+    viz.el.teams = document.querySelector("#teams")
+    viz.el.frameInput = document.querySelector("#frame-input")
+
+    viz.el.slider = document.querySelector("#frame-range")
+    viz.el.slider.addEventListener("input", onSliderInput)
+    viz.el.slider.addEventListener("change", onSliderChange)
+
+    document.querySelector("#live").addEventListener("change", onSwitchLive)
+
+    viz.el.code = document.querySelector("#codebox")
+    viz.el.code.addEventListener("dragover", eventStopAndPrevent)
+    viz.el.code.addEventListener("dragenter", eventStopAndPrevent)
+    viz.el.code.addEventListener("drop", onChooseFileDrop)
+
+    viz.el.reload = document.querySelector("#btn-reload")
+    viz.el.reload.addEventListener("click", apply)
+
     const phaserConfig = {
         type: Phaser.AUTO,
         width: visualsConfig.resolution.x,
@@ -232,9 +151,10 @@ window.addEventListener("load", () => {
                 debug: true     // TODO
             }
         },
-        scene: [new ChallengeScene(visualsConfig)],
-        parent: document.querySelector("#top"),
+        scene: [new LiveScene(visualsConfig)],
+        parent: document.querySelector("#right"),
     };
 
-    const game = new Phaser.Game(phaserConfig);
+    viz.game = new Phaser.Game(phaserConfig);
+    viz.scenes = new Phaser.Scenes.SceneManager(viz.game);
 })
