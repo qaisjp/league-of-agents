@@ -8,7 +8,7 @@ class State():
 
 
 class Team():
-    def __init__(self, name, cars, score):
+    def __init__(self, id, name, cars, score):
         self.id = id
         self.name = name
         self.cars = cars
