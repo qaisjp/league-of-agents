@@ -16,6 +16,7 @@ class MyEncoder(JSONEncoder):
         return o.__dict__   
 from client import API
 from agents.a_star import AStarAgent
+from agents.classes import State
 
 parser = argparse.ArgumentParser(description='League of Agents director')
 
@@ -65,6 +66,18 @@ def find_agent_from_team_id(team_id, agents):
         if a.get_team_id() == team_id:
             return a
     raise Exception("No agent with that team id")
+def merge_ws(ws):
+    _, firs_w = ws[0]
+    grid = firs_w.grid
+    ticks = firs_w.ticks
+    customers = firs_w.customers
+    teams = []
+    for a, w in ws:
+        for t in w.teams:
+            if t.id == a.get_team_id():
+                teams.append(t)
+    return State(grid, teams, customers, ticks)
+
 def main():
     api = API()
     # api = API(base_url="https://citysimlocal.eu.ngrok.io/")
@@ -130,13 +143,13 @@ def main():
         # print("Done!")
         if not world:
             break
-        current_tick = world.ticks
-        states.append(world)
+        #TODO: remove this API call
         act = []
+        ws = []
         for a in agents:
             # print("Acting...")
             w = api.get_world(team_id_to_token(a.get_team_id(), og_teams))
-
+            ws.append((a,w))
             actions = a.act(w)
             act.append({
                 "team": a.get_team_id(),
@@ -148,6 +161,9 @@ def main():
                     # log("Moving a car")
                     # log(f"{action.car_id} -> {action.direction}. Token: {team_id_to_token(a.get_team_id(), og_teams)}")
                     api.move_car(action.car_id, action.direction, team_id_to_token(a.get_team_id(), og_teams))
+        
+        current_tick = w.ticks
+        states.append(merge_ws(ws))
         acts.append(act)
         text = "Teams:\n"
         for i, t in enumerate(world.teams):
