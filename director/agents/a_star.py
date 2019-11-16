@@ -28,7 +28,7 @@ class AStarAgent():
         # print(team)
         customers = obs.customers
         if (len(customers) == 0):
-            print("No customer")
+            # print("No customer")
             actions = []
             for c in cars:
                 actions.append(Action(c.id))
@@ -40,8 +40,6 @@ class AStarAgent():
         for (car_index, dest) in assign:
             car = cars[car_index]
             actions += [self.Astar(car, dest, self.grid)]
-        for a in actions:
-            print(f"{a.car_id} -> {a.direction}")
         return actions
 
     def Astar(self, car, dest, grid):
@@ -138,10 +136,6 @@ class AStarAgent():
                     # dist_car += [heuristic(cars[i].position, customer.position)]
                     dist_car += [Astar(cars[i], customer.position, grid)]
             distances += [dist_car]
-        for c in cars:
-            if len(c.customers) > 0:
-                print("Customers in car")
-        print(distances)
         rows, columns = linear_sum_assignment(distances)
 
         for i in range(len(rows)):
@@ -155,9 +149,6 @@ class AStarAgent():
                 dist_cust = heuristic(cars[i].position, c.destination)
                 if dist_cust < closest_destination:
                     assign[i] = (i, c.destination)
-        print("ASSign")
-        print(assign)
-        print(list(map(lambda c: c.position, customers)))
         return assign
 
 def Astar(car, dest, grid):
