@@ -45,6 +45,12 @@ parser.add_argument('-v3', dest='v3', action='store_const',
                     const=True,
                     default=False,
                     help='Force V3')
+
+parser.add_argument('-v2', dest='v2', action='store_const',
+                    const=True,
+                    default=False,
+                    help='Force V2')
+
 parser.add_argument('-v1', dest='v1', action='store_const',
                     const=True,
                     default=False,
@@ -91,6 +97,8 @@ def main():
         a = create_agent("VEZOS", "Rioted", args.id if team_id is None else team_id, {})
     elif(args.v3):
         a = create_agent("A_STAR_V3", "Rioted", args.id if team_id is None else team_id, {"alpha": 0.0001, "beta": -0.6})
+    elif(args.v2):
+        a = create_agent("A_STAR_V2", "Rioted", args.id if team_id is None else team_id, {})
     elif(args.v1):
         a = create_agent("A_STAR", "Rioted", args.id if team_id is None else team_id, {})
     else:
