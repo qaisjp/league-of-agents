@@ -134,7 +134,7 @@ class AStarAgentv2:
             if not car.available_capacity == 0:
                 # TODO: Potentially multiply heuristic by const
                 dist_car = [
-                    Astar(car.position, c.position, grid) / costumer_d[i]
+                    10 * Astar(car.position, c.position, grid) / (costumer_d[i] + 0.00001)
                     for i, c in enumerate(customers)
                 ]
             c_indices += [c for c in car.customers]

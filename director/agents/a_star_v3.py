@@ -1,8 +1,9 @@
-from classes import Action, PriorityQueue
+from .classes import Action, PriorityQueue
+from .utils import customers_waiting
 from scipy.optimize import linear_sum_assignment
 
 class AStarAgentv3():
-    agent_type = "A_STAR"
+    agent_type = "A_STAR_V3"
 
     def __init__(self, name, team_id):
         self.name = name
@@ -17,8 +18,9 @@ class AStarAgentv3():
     def act(self, obs):
         # Obtain variables
         self.grid = obs.grid
+        self.obs = obs
         self.teams = obs.teams
-        self.customers = obs.customers
+        self.customers = customers_waiting(obs)
 
         team = [t for t in obs.teams if t.id == self.id][0]
         cars = team.cars
@@ -26,7 +28,7 @@ class AStarAgentv3():
         # print(teams)
         # print(customers)
         # print(team)
-        customers = obs.customers
+        customers =  customers_waiting(obs)
         if (len(customers) == 0):
             # print("No customer")
             actions = []
@@ -36,12 +38,12 @@ class AStarAgentv3():
         # Find closest pairs between cars and customers
         assign = self.findPairs(cars, customers, self.grid)
 
-        threshold = len(self.grid)/(2**0.5)
+        threshold = len(self.grid)/(2**0.7)
 
         actions = []
         for (car_index, dest, dist) in assign:
             car = cars[car_index]
-            print("Distance:", dist)
+            # print("Distance:", dist)
             if (dist<threshold):
                 actions += [self.Astar(car, dest, self.grid)]
             else:
@@ -150,7 +152,7 @@ class AStarAgentv3():
         for i in loaded_cars:
             closest_destination = len(grid) * 10
             for j in range(len(cars[i].customers)):
-                c = get_customer_from_id(cars[i].customers[j], customers)
+                c = get_customer_from_id(cars[i].customers[j], self.obs.customers)
                 dist_cust = heuristic(cars[i].position, c.destination)
                 if dist_cust < closest_destination:
                     assign[i] = (i, c.destination, 0)
