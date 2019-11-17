@@ -114,8 +114,13 @@ def main():
             print("Choosing V3 because a lot of walls (also big map)")
             a = create_agent("A_STAR_V3", "Rioted", args.id if team_id is None else team_id, {"alpha": 0.0001, "beta": -0.6})
         else:
-            print("Choosing Vezos because a lot of open space")
-            a = create_agent("VEZOS", "Rioted", args.id if team_id is None else team_id, {})
+            print("Choosing Vezos/V2 because a lot of open space")
+            if(width < 40):
+                print("Choosing V2")
+                a = create_agent("A_STAR_V2", "Rioted", args.id if team_id is None else team_id, {})
+            else:
+                print("Choosing Vezos")
+                a = create_agent("VEZOS", "Rioted", args.id if team_id is None else team_id, {})
     print("ID:")
     print(a.get_team_id())
     previous_w = None

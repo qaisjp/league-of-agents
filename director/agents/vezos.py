@@ -37,13 +37,24 @@ class Vezos:
             for c in cars:
                 actions.append(Action(c.id))
             return actions
+
+        
         
         assign = self.findPairs(cars, customers, self.grid)
+        
+        threshold = len(self.grid) / (
+            2 ** (0.6)
+        )
+
+
         actions = []
 
-        for (car_index, dest) in assign:
+        for (car_index, dest, dist) in assign:
             car = cars[car_index]
-            actions += [self.Astar(car, dest, self.grid)]
+            if dist < threshold:
+                actions += [self.Astar(car, dest, self.grid)]
+            else:
+                actions += [Action(car.id)]
         return actions
 
     def Astar(self, car, dest, grid):
