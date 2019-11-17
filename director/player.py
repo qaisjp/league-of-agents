@@ -117,6 +117,7 @@ def main():
             print("Choosing Vezos/V2 because a lot of open space")
             if(width < 40):
                 print("Choosing V2")
+                print("Small map")
                 a = create_agent("A_STAR_V2", "Rioted", args.id if team_id is None else team_id, {})
             else:
                 print("Choosing Vezos")
