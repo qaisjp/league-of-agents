@@ -94,12 +94,16 @@ def main():
         if t.name == "page":
             team_id = t.id
     if(args.vezos):
+        print("Using Vezos")
         a = create_agent("VEZOS", "Rioted", args.id if team_id is None else team_id, {})
     elif(args.v3):
+        print("Using V3")
         a = create_agent("A_STAR_V3", "Rioted", args.id if team_id is None else team_id, {"alpha": 0.0001, "beta": -0.6})
     elif(args.v2):
+        print("Using V2")
         a = create_agent("A_STAR_V2", "Rioted", args.id if team_id is None else team_id, {})
     elif(args.v1):
+        print("Using V1")
         a = create_agent("A_STAR", "Rioted", args.id if team_id is None else team_id, {})
     else:
         white_squares = sum(map(sum, world.grid))
