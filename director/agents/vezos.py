@@ -37,24 +37,13 @@ class Vezos:
             for c in cars:
                 actions.append(Action(c.id))
             return actions
-
-        
         
         assign = self.findPairs(cars, customers, self.grid)
-        
-        threshold = len(self.grid) / (
-            2 ** (0.6)
-        )
-
-
         actions = []
 
-        for (car_index, dest, dist) in assign:
+        for (car_index, dest) in assign:
             car = cars[car_index]
-            if dist < threshold:
-                actions += [self.Astar(car, dest, self.grid)]
-            else:
-                actions += [Action(car.id)]
+            actions += [self.Astar(car, dest, self.grid)]
         return actions
 
     def Astar(self, car, dest, grid):
@@ -196,7 +185,7 @@ class Vezos:
         return assign
 
 
-MAX_DEPTH = 40
+MAX_DEPTH = 50
 
 
 def Astar(start, dest, grid):
@@ -213,6 +202,7 @@ def Astar(start, dest, grid):
     parent[start] = None
     cost[start] = 0
     depth[start] = 0
+    start = time.time()
     while not pq.is_empty():
 
         curr = pq.pop()
