@@ -5,12 +5,8 @@
             "name": "Bezos3"
         },
         {
-            "type": "A_STAR",
+            "type": "A_STAR_V3",
             "name": "Bezos the OG"
         },
-        {
-            "type": "VEZOS",
-            "name": "Vezos"
-        }
     ]
 }

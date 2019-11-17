@@ -50,7 +50,7 @@ class AStarAgentv3:
         assign = self.findPairs(cars, customers, self.grid)
 
         threshold = len(self.grid) / (
-            2 ** (sigmoid(obs.ticks - self.first_tick, self.alpha) + self.beta)
+            2 ** (-sigmoid(obs.ticks - self.first_tick, self.alpha) + self.beta)
         )
 
         actions = []
