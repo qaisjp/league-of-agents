@@ -98,7 +98,7 @@ def main():
         a = create_agent("VEZOS", "Rioted", args.id if team_id is None else team_id, {})
     elif(args.v3):
         print("Using V3")
-        a = create_agent("A_STAR_V3", "Rioted", args.id if team_id is None else team_id, {"alpha": 0.0001, "beta": -0.6})
+        a = create_agent("A_STAR_V3", "Rioted", args.id if team_id is None else team_id, {"alpha": 0.0001, "beta": -0.1})
     elif(args.v2):
         print("Using V2")
         a = create_agent("A_STAR_V2", "Rioted", args.id if team_id is None else team_id, {})
@@ -112,7 +112,7 @@ def main():
         print(f"{white_squares} squares and {width ** 2 - white_squares} black squares")
         if(width ** 2 - white_squares > 0.6 * width ** 2 and width > 50):
             print("Choosing V3 because a lot of walls (also big map)")
-            a = create_agent("A_STAR_V3", "Rioted", args.id if team_id is None else team_id, {"alpha": 0.0001, "beta": -0.6})
+            a = create_agent("A_STAR_V3", "Rioted", args.id if team_id is None else team_id, {"alpha": 0.0001, "beta": -0.1})
         else:
             print("Choosing Vezos/V2 because a lot of open space")
             if(width < 40):
