@@ -6,6 +6,21 @@ import pickle
 from .classes import Car, Team, Customer, State, Action, PriorityQueue
 import json
 
+def get_customer_from_id(id, customers):
+    for c in customers:
+        if c.id == id:
+            return c
+    raise Exception(f"No customer with id {id}")
+
+
+def customers_waiting(obs):
+    customers_id = list(map(lambda c: c.id, obs.customers))
+    for t in obs.teams:
+        for c in t.cars:
+             customers_id = [item for item in customers_id if item not in c.customers]
+    cust = list(map(lambda id: get_customer_from_id(id, obs.customers), customers_id))
+    return cust
+
 def parse_car(c):
     return Car(c["id"], c["position"], c["capacity"], c["available_capacity"], c["customers"])
 def parse_team(t):

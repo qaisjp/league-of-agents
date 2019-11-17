@@ -23,8 +23,11 @@ def find_agent_from_team_id(team_id, agents):
             return a
     raise Exception("No agent with that team id")
 
-def run_game(agents_and_hooks, max_ticks):
-    api = API()
+def run_game(agents_and_hooks, max_ticks, api_base_url=None):
+    if api_base_url is not None:
+        api = API(base_url=api_base_url)
+    else:
+        api = API()
     api.stop_game()
     available_teams = api.get_team_tokens()
     agents = []
@@ -45,10 +48,10 @@ def run_game(agents_and_hooks, max_ticks):
         agent = create_agent(team["id"])
         agents.append(agent)
     states = []
+
     acts = []
     starting_tick = None
     while True:
-        # print("Getting the world...")
         world = api.get_world()
         # print("Done!")
         if not world:
@@ -60,7 +63,7 @@ def run_game(agents_and_hooks, max_ticks):
         for a, h in zip(agents, hooks):
             w = api.get_world(team_id_to_token(a.get_team_id(), og_teams))
             actions = a.act(w)
-            h(w, actions)
+            h(a.get_team_id(), w, actions)
             for action in actions:
                 if action.direction is not None:
                     api.move_car(action.car_id, action.direction, team_id_to_token(a.get_team_id(), og_teams))
@@ -68,7 +71,7 @@ def run_game(agents_and_hooks, max_ticks):
         current_tick = w.ticks
         if current_tick - starting_tick > max_ticks:
             api.stop_game()
-            return
+            return w.teams
         while True:
             # print("Waiting for tick...")
             w = api.get_world()
@@ -76,4 +79,8 @@ def run_game(agents_and_hooks, max_ticks):
             if not w:
                 break
             if w.ticks is not current_tick:
+                if w.ticks - current_tick > 1:
+                    print(f"Unsync {w.ticks - current_tick}")
                 break
+
+    return w.teams

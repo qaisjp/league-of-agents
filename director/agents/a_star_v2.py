@@ -1,8 +1,9 @@
-from classes import Action, PriorityQueue
+from .classes import Action, PriorityQueue
+from .utils import customers_waiting
 from scipy.optimize import linear_sum_assignment
 
 
-class AStarAgentv2():
+class AStarAgentv2:
     agent_type = "A_STARv2"
 
     def __init__(self, name, team_id):
@@ -19,7 +20,8 @@ class AStarAgentv2():
         # Obtain variables
         self.grid = obs.grid
         self.teams = obs.teams
-        self.customers = obs.customers
+        self.obs = obs
+        self.customers = customers_waiting(obs)
 
         team = [t for t in obs.teams if t.id == self.id][0]
         cars = team.cars
@@ -27,9 +29,9 @@ class AStarAgentv2():
         # print(teams)
         # print(customers)
         # print(team)
-        customers = obs.customers
-        if (len(customers) == 0):
-            print("No customer")
+        customers = customers_waiting(obs)
+        if len(customers) == 0:
+            # print("No customer")
             actions = []
             for c in cars:
                 actions.append(Action(c.id))
@@ -41,8 +43,6 @@ class AStarAgentv2():
         for (car_index, dest) in assign:
             car = cars[car_index]
             actions += [self.Astar(car, dest, self.grid)]
-        for a in actions:
-            print(f"{a.car_id} -> {a.direction}")
         return actions
 
     def Astar(self, car, dest, grid):
@@ -100,20 +100,20 @@ class AStarAgentv2():
             targ = prev
             prev = parent[prev]
         if (targ[0] - prev[0]) == 0:
-            if (targ[1] - prev[1] == 1):
+            if targ[1] - prev[1] == 1:
                 action = Action(car.id, 2)
                 return action
             else:
                 action = Action(car.id, 0)
                 return action
         else:
-            if (targ[0] - prev[0] == 1):
+            if targ[0] - prev[0] == 1:
                 action = Action(car.id, 1)
                 return action
             else:
                 action = Action(car.id, 3)
                 return action
-        raise Exception('You retards')
+        raise Exception("You retards")
 
     def findPairs(self, cars, customers, grid):
 
@@ -122,17 +122,14 @@ class AStarAgentv2():
         for (i, car) in enumerate(cars):
             assign += [(i, (car.position[0], car.position[1]))]
 
-        costumer_d = [
-            Astar(c.position, c.destination, grid) for c in customers
-        ]
+        costumer_d = [Astar(c.position, c.destination, grid) for c in customers]
 
         # Matrix of distances between cars (rows) and customers (columns)
         distances = []
-
+        c_indices = [c.id for c in customers]
         for car in cars:
             # Initialize all distances as infeasible
             dist_car = [len(grid) * 10 for i in range(len(customers))]
-
             # If the car can carry more people, add heuristic distances from car to customers
             if not car.available_capacity == 0:
                 # TODO: Potentially multiply heuristic by const
@@ -140,17 +137,16 @@ class AStarAgentv2():
                     Astar(car.position, c.position, grid) / costumer_d[i]
                     for i, c in enumerate(customers)
                 ]
-
+            c_indices += [c for c in car.customers]
             for other_car in cars:
                 if car.id == other_car.id:
                     # Add distances from car to customers destinations
                     car_customers = [
-                        get_customer_from_id(id, customers)
+                        get_customer_from_id(id, self.obs.customers)
                         for id in other_car.customers
                     ]
                     dist_car += [
-                        Astar(car.position, c.destination, grid)
-                        for c in car_customers
+                        Astar(car.position, c.destination, grid) for c in car_customers
                     ]
                 else:
                     # Add array of infeasible distances for customers of other cars
@@ -159,32 +155,27 @@ class AStarAgentv2():
                     ]
 
             distances += [dist_car]
-
         # Some debugging?
-        for c in cars:
-            if len(c.customers) > 0:
-                print("Customers in car")
-        print(distances)
+
 
         rows, columns = linear_sum_assignment(distances)
 
         for i in range(len(rows)):
-            j = columns[i]
-            if j < len(customers):
-                assign[rows[i]] = (rows[i], customers[j].position)
+            if c_indices[columns[i]] in cars[rows[i]].customers:
+                assign += [
+                    (
+                        rows[i],
+                        get_customer_from_id(c_indices[columns[i]], self.obs.customers).destination
+                    )
+                ]
             else:
-                c = 0
-                while not 0 == j:
-                    if j < len(cars[c].customers):
-                        assign[rows[i]] = (rows[i],
-                                           cars[c].customers[j].position)
-                        j = 0
-                    j -= len(cars[c].customers)
-                    c += 1
+                assign += [
+                    (
+                        rows[i],
+                        get_customer_from_id(c_indices[columns[i]], self.obs.customers).position
+                    )
+                ]
 
-        print("ASSign")
-        print(assign)
-        print(list(map(lambda c: c.position, customers)))
         return assign
 
 
@@ -209,11 +200,11 @@ def Astar(start, dest, grid):
             neighbor = add(curr, dir)
             if neighbor[0] < 0:
                 continue
-            if neighbor[0] >= len(grid):  #TODO
+            if neighbor[0] >= len(grid):  # TODO
                 continue
             if neighbor[1] < 0:
                 continue
-            if neighbor[1] >= len(grid[0]):  #TODO
+            if neighbor[1] >= len(grid[0]):  # TODO
                 continue
             if grid[neighbor[1]][neighbor[0]] == False:
                 continue
@@ -246,4 +237,4 @@ def get_customer_from_id(id, customers):
 def heuristic(pos1, pos2):
     (x1, y1) = pos1
     (x2, y2) = pos2
-    return abs(x1 - x2) + abs(y1 - y2)
+    return (x1 - x2) ** 2 + (y1 - y2) ** 2

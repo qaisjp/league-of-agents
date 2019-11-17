@@ -1,11 +1,7 @@
 {
     "agents": [
         {
-            "type": "A_STAR",
-            "name": "Bezos"
-        },
-        {
-            "type": "A_STAR",
+            "type": "A_STAR_V2",
             "name": "Bezos2"
         }
     ]

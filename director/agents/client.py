@@ -176,12 +176,15 @@ class API():
 
         tr_elements = doc.xpath('//tr')
         for e in tr_elements:
+            print(e[1].text_content())
             if e[1].text_content() == team_name:
                 token = e[2].text_content()
                 id = e[0].text_content()
 
         logging.info('Created team %s', team_name)
-
+        print(team_name)
+        print(id)
+        print(token)
         return token, team_name, id
 
     def get_team_tokens(self):

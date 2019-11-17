@@ -3,7 +3,7 @@
         {
             "type": "RL",
             "name": "Bezos",
-            "path": "supervised.th"
+            "path": "dagger.th"
         },
         {
             "type": "A_STAR",

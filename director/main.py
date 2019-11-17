@@ -16,6 +16,7 @@ class MyEncoder(JSONEncoder):
         return o.__dict__   
 from agents.client import API
 from agents.a_star import AStarAgent
+from agents.a_star_v2 import AStarAgentv2
 from agents.rl import RLAgent
 from agents.classes import State
 
@@ -27,6 +28,8 @@ parser.add_argument('-i', metavar='in-file', type=argparse.FileType('rt'))
 def create_agent(t, team_name, team_id, json):
     if(t == "A_STAR"):
         a = AStarAgent(team_name, team_id)
+    if(t == "A_STAR_V2"):
+        a = AStarAgentv2(team_name, team_id)
     if(t == "RL"):
         a = RLAgent(team_name, team_id, json["path"])
     return a
@@ -51,17 +54,17 @@ def create_ui(number_agents):
 def create_logger(logs, ui):
     def log(text):
         logs.append(text)
-        ui.display()
+        # ui.display()
     return log
 def create_charter(chart, ui):
     def c(value):
         chart.append(max(min((float(value) / 100) + 50, 100), 0))
-        ui.display()
+        # ui.display()
     return c
 def create_displayer(text, ui):
     def d(t):
         text.text = t
-        ui.display()
+        # ui.display()
     return d
 def find_agent_from_team_id(team_id, agents):
     for a in agents:
@@ -162,8 +165,8 @@ def main():
             })
             for action in actions:
                 if action.direction is not None:
-                    # log("Moving a car")
-                    # log(f"{action.car_id} -> {action.direction}. Token: {team_id_to_token(a.get_team_id(), og_teams)}")
+                    log("Moving a car")
+                    log(f"{action.car_id} -> {action.direction}. Token: {team_id_to_token(a.get_team_id(), og_teams)}")
                     api.move_car(action.car_id, action.direction, team_id_to_token(a.get_team_id(), og_teams))
         
         current_tick = w.ticks
