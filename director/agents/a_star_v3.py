@@ -176,7 +176,7 @@ class AStarAgentv3:
         return assign
 
 
-MAX_DEPTH = 40
+MAX_DEPTH = 45
 def Astar(car, dest, grid):
     directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
     start = car.position 

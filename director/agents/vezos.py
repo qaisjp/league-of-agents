@@ -185,7 +185,7 @@ class Vezos:
         return assign
 
 
-MAX_DEPTH = 50
+MAX_DEPTH = 45
 
 
 def Astar(start, dest, grid):
