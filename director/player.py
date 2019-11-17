@@ -98,8 +98,8 @@ def main():
         width = len(world.grid)
         print(f"Size is {width}x{width}")
         print(f"{white_squares} squares and {width ** 2 - white_squares} black squares")
-        if(width ** 2 - white_squares > 0.6 * width ** 2 ):
-            print("Choosing V3 because a lot of walls")
+        if(width ** 2 - white_squares > 0.6 * width ** 2 and width > 50):
+            print("Choosing V3 because a lot of walls (also big map)")
             a = create_agent("A_STAR_V3", "Rioted", args.id if team_id is None else team_id, {"alpha": 0.0001, "beta": -0.6})
         else:
             print("Choosing Vezos because a lot of open space")
