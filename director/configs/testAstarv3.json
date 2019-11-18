@@ -1,0 +1,16 @@
+{
+    "agents": [
+        {
+            "type": "A_STAR_V3",
+            "name": "Bezos alpha=0.0001",
+            "alpha": 0.0001,
+            "beta": -0.6
+        },
+        {
+            "type": "A_STAR_V3",
+            "name": "dfd01",
+            "alpha": 0.5,
+            "beta": -0.6
+        }
+    ]
+}

@@ -29,7 +29,7 @@ parser = argparse.ArgumentParser(description="League of Agents director")
 
 parser.add_argument("-i", metavar="in-file", type=argparse.FileType("rt"))
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 def create_agent(t, team_name, team_id, json):
     if t == "A_STAR":
         a = AStarAgent(team_name, team_id)

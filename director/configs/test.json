@@ -2,11 +2,15 @@
     "agents": [
         {
             "type": "A_STAR_V3",
-            "name": "Bezos3"
+            "name": "Bezos3",
+            "alpha": 0.01,
+            "beta": 0.9
         },
         {
             "type": "A_STAR_V3",
-            "name": "Bezos the OG"
-        },
+            "name": "Bezos the OG",
+            "alpha": 0.001,
+            "beta": 0.9
+        }
     ]
 }
