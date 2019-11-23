@@ -6,8 +6,8 @@ We don't care how you optimize the delivery of customers, it can be a simple if 
 
 The solutions will be judged on creativity, impact, feasibility, novelty and cost efficiency.
 
-This won Ericsson's "Greener city transport with 5G" challenge on the "Secure the Future" track,
-at [Junction 2019](https://2019.hackjunction.com/).
+**This won Ericsson's "Greener city transport with 5G" challenge on the "Secure the Future" track,
+at [Junction 2019](https://2019.hackjunction.com/).**
 
 ## Agent
 
